@@ -1,1 +1,5015 @@
-hello `world`
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Wrike Retainer Time Entry Manager &mdash; Informatics Inc</title>
+
+<style>
+
+  *, ::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+
+    --bg: #ffffff;
+
+    --bg-secondary: #f6f5f2;
+
+    --bg-tertiary: #eeede9;
+
+    --text: #1a1918;
+
+    --text-secondary: #6b6a66;
+
+    --text-muted: #9b9a96;
+
+    --border: rgba(0,0,0,0.12);
+
+    --border-strong: rgba(0,0,0,0.22);
+
+    --success-bg: #eaf3de;
+
+    --success-text: #3b6d11;
+
+    --danger-bg: #fcebeb;
+
+    --danger-text: #a32d2d;
+
+    --warning-bg: #faeeda;
+
+    --warning-text: #854f0b;
+
+    --info-bg: #e6f1fb;
+
+    --info-text: #185fa5;
+
+    --radius: 8px;
+
+    --radius-lg: 12px;
+
+    --mono: 'Courier New', Courier, monospace;
+
+  }
+
+  @media (prefers-color-scheme: dark) {
+
+    :root {
+
+      --bg: #1c1b19;
+
+      --bg-secondary: #252421;
+
+      --bg-tertiary: #2e2d2a;
+
+      --text: #f0efeb;
+
+      --text-secondary: #a09f9b;
+
+      --text-muted: #6b6a66;
+
+      --border: rgba(255,255,255,0.1);
+
+      --border-strong: rgba(255,255,255,0.2);
+
+      --success-bg: #173404;
+
+      --success-text: #97c459;
+
+      --danger-bg: #501313;
+
+      --danger-text: #f09595;
+
+      --warning-bg: #412402;
+
+      --warning-text: #ef9f27;
+
+      --info-bg: #042c53;
+
+      --info-text: #85b7eb;
+
+    }
+
+  }
+
+  body {
+
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+    background: var(--bg-tertiary);
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    padding: 2rem 1rem;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+
+  }
+
+  .container {
+
+    max-width: 860px;
+
+    margin: 0 auto;
+
+    background: var(--bg);
+
+    border-radius: var(--radius-lg);
+
+    border: 0.5px solid var(--border);
+
+    overflow: hidden;
+
+  }
+
+  .app-header {
+
+    padding: 1.25rem 1.75rem;
+
+    border-bottom: 0.5px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+  }
+
+  .app-header h1 { font-size: 15px; font-weight: 600; color: var(--text); }
+
+  .app-header p { font-size: 12px; color: var(--text-muted); font-family: var(--mono); margin-top: 2px; }
+
+  .version-tag { font-size: 11px; font-family: var(--mono); padding: 3px 8px; background: var(--bg-secondary); border-radius: 20px; color: var(--text-muted); border: 0.5px solid var(--border); }
+
+  .app-body { padding: 1.5rem 1.75rem; }
+
+  .steps {
+
+    display: flex;
+
+    gap: 0;
+
+    margin-bottom: 1.5rem;
+
+    background: var(--bg-secondary);
+
+    border-radius: var(--radius);
+
+    padding: 10px 16px;
+
+    align-items: center;
+
+  }
+
+  .step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+
+  .step + .step::before { content: '\203A'; margin: 0 12px; color: var(--text-muted); font-size: 16px; }
+
+  .snum {
+
+    width: 22px; height: 22px; border-radius: 50%;
+
+    background: var(--bg-tertiary); border: 0.5px solid var(--border-strong);
+
+    display: flex; align-items: center; justify-content: center;
+
+    font-size: 11px; font-weight: 600; flex-shrink: 0; color: var(--text-muted);
+
+  }
+
+  .snum.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  .snum.done { background: var(--success-bg); color: var(--success-text); border-color: var(--success-text); }
+
+  .status-bar {
+
+    font-size: 12px; font-family: var(--mono);
+
+    padding: 9px 14px; background: var(--bg-secondary);
+
+    border-radius: var(--radius); color: var(--text-secondary);
+
+    margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;
+
+    min-height: 36px; border: 0.5px solid var(--border);
+
+  }
+
+  .status-bar.error { color: var(--danger-text); background: var(--danger-bg); border-color: var(--danger-text); }
+
+  .status-bar.success { color: var(--success-text); background: var(--success-bg); border-color: var(--success-text); }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  .pulse { animation: pulse 1.2s ease-in-out infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .field { margin-bottom: 1rem; }
+
+  .field label {
+
+    font-size: 11px; font-weight: 600; color: var(--text-secondary);
+
+    letter-spacing: 0.07em; text-transform: uppercase; display: block; margin-bottom: 5px;
+
+  }
+
+  .field input, .field select {
+
+    width: 100%; padding: 8px 12px; border: 0.5px solid var(--border-strong);
+
+    border-radius: var(--radius); background: var(--bg); color: var(--text);
+
+    font-size: 13px; font-family: var(--mono); outline: none;
+
+    transition: border-color 0.15s;
+
+  }
+
+  .field input:focus, .field select:focus { border-color: var(--text); }
+
+  .field input[readonly] { opacity: 0.5; background: var(--bg-secondary); }
+
+  .field .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  .token-row { display: flex; gap: 8px; }
+
+  .token-row input { flex: 1; }
+
+  button {
+
+    cursor: pointer; font-family: inherit; font-size: 13px;
+
+    border-radius: var(--radius); transition: opacity 0.15s, background 0.15s;
+
+  }
+
+  .btn-primary {
+
+    background: var(--text); color: var(--bg); border: none;
+
+    padding: 9px 22px; font-weight: 600;
+
+  }
+
+  .btn-primary:hover { opacity: 0.82; }
+
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-outline {
+
+    background: transparent; border: 0.5px solid var(--border-strong);
+
+    padding: 9px 16px; color: var(--text);
+
+  }
+
+  .btn-outline:hover { background: var(--bg-secondary); }
+
+  .btn-sm {
+
+    padding: 4px 11px; font-size: 12px; background: transparent;
+
+    border: 0.5px solid var(--border-strong); color: var(--text-secondary);
+
+  }
+
+  .btn-sm:hover { background: var(--bg-secondary); color: var(--text); }
+
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.5rem 0; }
+
+  .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+
+  .scard { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.85rem 1rem; border: 0.5px solid var(--border); }
+
+  .scard .slabel { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 5px; }
+
+  .scard .sval { font-size: 22px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+
+  .table-wrap { overflow-x: auto; border: 0.5px solid var(--border); border-radius: var(--radius); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+
+  thead th {
+
+    text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+
+    text-transform: uppercase; color: var(--text-muted); padding: 8px 12px;
+
+    border-bottom: 0.5px solid var(--border); background: var(--bg-secondary);
+
+    white-space: nowrap;
+
+  }
+
+  tbody td {
+
+    padding: 9px 12px; border-bottom: 0.5px solid var(--border);
+
+    color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td { background: var(--bg-secondary); }
+
+  tbody tr.selected td { background: var(--info-bg); }
+
+  .task-group-row td {
+
+    font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+
+    color: var(--text-muted); padding: 6px 12px;
+
+    background: var(--bg-tertiary); border-bottom: 0.5px solid var(--border);
+
+  }
+
+  .tag {
+
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+
+    border-radius: 20px; font-family: var(--mono); white-space: nowrap;
+
+  }
+
+  .tag-orange { background: var(--warning-bg); color: var(--warning-text); }
+
+  .tag-muted { background: var(--bg-secondary); color: var(--text-muted); border: 0.5px solid var(--border); }
+
+  .split-panel {
+
+    background: var(--bg); border: 0.5px solid var(--border-strong);
+
+    border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 1.5rem;
+
+  }
+
+  .split-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 1rem; }
+
+  .entry-info {
+
+    font-size: 12px; font-family: var(--mono); color: var(--text-secondary);
+
+    margin-bottom: 1.1rem; padding: 10px 14px; background: var(--bg-secondary);
+
+    border-radius: var(--radius); line-height: 2; border: 0.5px solid var(--border);
+
+  }
+
+  .entry-info strong { color: var(--text); }
+
+  .calc-bar {
+
+    font-size: 12px; font-family: var(--mono); padding: 8px 12px;
+
+    border-radius: var(--radius); margin-bottom: 1rem;
+
+    display: flex; justify-content: space-between; align-items: center;
+
+    border: 0.5px solid transparent;
+
+  }
+
+  .calc-bar.neutral { background: var(--bg-secondary); color: var(--text-muted); border-color: var(--border); }
+
+  .calc-bar.valid { background: var(--success-bg); color: var(--success-text); border-color: var(--success-text); }
+
+  .calc-bar.invalid { background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-text); }
+
+  .cat-badge {
+
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+
+    background: var(--warning-bg); border-radius: var(--radius);
+
+    margin-bottom: 1rem; font-size: 12px; color: var(--warning-text);
+
+    border: 0.5px solid var(--warning-text);
+
+  }
+
+  .confirm-box {
+
+    background: var(--info-bg); border-radius: var(--radius); padding: 10px 14px;
+
+    font-size: 12px; color: var(--info-text); margin-bottom: 1rem; line-height: 1.8;
+
+    border: 0.5px solid var(--info-text);
+
+  }
+
+  .action-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .result-msg { font-size: 12px; font-family: var(--mono); color: var(--text-muted); }
+
+  .cat-found {
+
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+
+    background: var(--success-bg); border-radius: var(--radius);
+
+    margin-bottom: 1rem; font-size: 12px; color: var(--success-text);
+
+    border: 0.5px solid var(--success-text);
+
+  }
+
+  .cat-missing {
+
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+
+    background: var(--danger-bg); border-radius: var(--radius);
+
+    margin-bottom: 1rem; font-size: 12px; color: var(--danger-text);
+
+    border: 0.5px solid var(--danger-text);
+
+  }
+
+  .global-search-bar {
+
+    display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+
+    padding: 12px 1.75rem; background: var(--bg-secondary);
+
+    border-bottom: 0.5px solid var(--border);
+
+  }
+
+  .global-label {
+
+    font-size: 11px; font-weight: 600; color: var(--text-secondary);
+
+    letter-spacing: 0.07em; text-transform: uppercase; display: block; margin-bottom: 5px;
+
+  }
+
+  .global-search-bar input {
+
+    padding: 7px 10px; border: 0.5px solid var(--border-strong);
+
+    border-radius: var(--radius); background: var(--bg); color: var(--text);
+
+    font-size: 13px; outline: none;
+
+  }
+
+  .global-search-bar input:focus { border-color: var(--text); }
+
+  .tab-nav {
+
+    display: flex; gap: 4px;
+
+    padding: 10px 1.75rem 0;
+
+    background: var(--bg-tertiary);
+
+    border-bottom: 2px solid var(--border-strong);
+
+  }
+
+  .tab-btn {
+
+    padding: 9px 20px 11px; font-size: 13px; font-weight: 500;
+
+    background: var(--bg-tertiary); border: 0.5px solid transparent;
+
+    border-bottom: none; border-radius: 6px 6px 0 0;
+
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+
+    position: relative; bottom: -2px;
+
+  }
+
+  .tab-btn:hover { color: var(--text); background: var(--bg-secondary); }
+
+  .tab-btn.active {
+
+    color: var(--text); background: var(--bg);
+
+    border-color: var(--border-strong);
+
+    border-bottom-color: var(--bg);
+
+    font-weight: 600;
+
+  }
+
+  .report-summary-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.5rem; }
+
+  .report-section { margin-bottom: 1.5rem; }
+
+  .report-section h3 { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px; }
+
+  .report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  .report-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); padding: 6px 10px; border-bottom: 0.5px solid var(--border); background: var(--bg-secondary); }
+
+  .report-table th.num { text-align: right; }
+
+  .report-table td { padding: 7px 10px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+
+  .report-table td.num { text-align: right; font-family: var(--mono); font-weight: 500; }
+
+  .report-table tr.sub-project-row td { font-weight: 600; background: var(--bg-secondary); font-size: 12px; color: var(--text-secondary); letter-spacing: 0.04em; }
+
+  .report-table tr.task-row td:first-child { padding-left: 24px; color: var(--text-secondary); }
+
+  .report-table tr.total-row td { font-weight: 600; border-top: 1px solid var(--border-strong); }
+
+  .smart-sentences { font-size: 14px; line-height: 1.9; color: var(--text); background: var(--bg-secondary); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; border: 0.5px solid var(--border); }
+
+  .smart-sentences strong { color: var(--text); }
+
+  .toolbar-btn {
+
+    padding: 4px 8px; font-size: 12px; background: var(--bg);
+
+    border: 0.5px solid var(--border); border-radius: 4px;
+
+    cursor: pointer; color: var(--text); font-family: inherit;
+
+  }
+
+  .toolbar-btn:hover { background: var(--bg-tertiary); }
+
+  .empty-state { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 13px; }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="app-header">
+
+    <div>
+
+      <h1>&#x23F1; Retainer time entry manager</h1>
+
+      <p>Wrike &middot; Informatics Inc &middot; PM tool</p>
+
+    </div>
+
+    <span class="version-tag">v4.1</span>
+
+  </div>
+
+  <!-- Global search bar -->
+
+  <div class="global-search-bar">
+
+    <div style="flex:1;min-width:130px;">
+
+      <label class="global-label">SOW number</label>
+
+      <input type="text" id="sow-search" placeholder="e.g. 24155" style="width:100%;font-family:var(--mono);font-size:14px;font-weight:600;" oninput="onSearchInput('sow')" />
+
+    </div>
+
+    <div style="display:flex;align-items:center;color:var(--text-muted);font-size:12px;font-weight:500;padding-top:18px;">or</div>
+
+    <div style="flex:2;min-width:180px;">
+
+      <label class="global-label">Project name</label>
+
+      <input type="text" id="project-search" placeholder="e.g. Santa Clara County..." style="width:100%;" oninput="onSearchInput('name')" />
+
+    </div>
+
+    <div style="flex:1;min-width:120px;">
+
+      <label class="global-label">Date range &mdash; start</label>
+
+      <input type="date" id="date-start" style="width:100%;" />
+
+    </div>
+
+    <div style="flex:1;min-width:120px;">
+
+      <label class="global-label">Date range &mdash; end</label>
+
+      <input type="date" id="date-end" style="width:100%;" />
+
+    </div>
+
+  </div>
+
+  <div id="projects-found" style="display:none;padding:8px 1.75rem;background:var(--bg-secondary);border-bottom:0.5px solid var(--border);font-size:12px;"></div>
+
+  <div class="tab-nav">
+
+    <button class="tab-btn active" id="tab-btn-manager" onclick="switchTab('manager')">&#x23F1; Time Entry Manager</button>
+
+    <button class="tab-btn" id="tab-btn-report" onclick="switchTab('report')">&#128196; Monthly Retainer Report</button>
+
+    <button class="tab-btn" id="tab-btn-csm" onclick="switchTab('csm')">&#128101; CSM Overview</button>
+
+    <button class="tab-btn" id="tab-btn-staffing" onclick="switchTab('staffing')">&#128196; Staffing &amp; Role Report</button>
+
+  </div>
+
+  <div id="tab-manager" class="app-body">
+
+    <div class="steps">
+
+      <div class="step"><div class="snum done" id="sn1">&#10003;</div><span>Connected</span></div>
+
+      <div class="step"><div class="snum active" id="sn2">2</div><span>Load entries</span></div>
+
+      <div class="step"><div class="snum" id="sn3">3</div><span>Split entry</span></div>
+
+    </div>
+
+    <div id="status" class="status-bar"><div class="dot pulse"></div>Connecting to Wrike...</div>
+
+    <div id="pane-query" style="display:none;">
+
+      <hr class="divider">
+
+      <div id="cat-status-banner"></div>
+
+      <button class="btn-primary" id="load-btn" onclick="loadEntries()">&#8635; Load time entries</button>
+
+    </div>
+
+    <div id="pane-entries" style="display:none;">
+
+      <hr class="divider">
+
+      <div class="summary-cards" style="grid-template-columns:repeat(4,1fr);">
+
+        <div class="scard"><div class="slabel" id="lbl-total">Total logged</div><div class="sval" id="sum-total">&mdash;</div></div>
+
+        <div class="scard" style="border:0.5px solid var(--success-text);"><div class="slabel" style="color:var(--success-text);" id="lbl-billable">Client-visible</div><div class="sval" id="sum-billable">&mdash;</div></div>
+
+        <div class="scard"><div class="slabel">Internal removed</div><div class="sval" id="sum-internal">&mdash;</div></div>
+
+        <div class="scard"><div class="slabel">Entries shown</div><div class="sval" id="sum-count">&mdash;</div></div>
+
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:1rem;align-items:flex-end;flex-wrap:wrap;">
+
+        <div style="flex:1;min-width:140px;">
+
+          <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Filter by task</label>
+
+          <select id="filter-task" onchange="applyFilters()" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+            <option value="">All tasks</option>
+
+          </select>
+
+        </div>
+
+        <div style="flex:1;min-width:140px;">
+
+          <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Filter by person</label>
+
+          <select id="filter-person" onchange="applyFilters()" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+            <option value="">All people</option>
+
+          </select>
+
+        </div>
+
+        <div style="flex:1;min-width:140px;">
+
+          <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Filter by category</label>
+
+          <select id="filter-category" onchange="applyFilters()" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+            <option value="">All categories</option>
+
+            <option value="__none__">No category</option>
+
+          </select>
+
+        </div>
+
+        <button class="btn-outline" onclick="clearFilters()" style="padding:7px 14px;font-size:12px;white-space:nowrap;">&#10005; Clear filters</button>
+
+        <span id="filter-count" style="font-size:12px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;"></span>
+
+      </div>
+
+      <div id="lock-bar" style="display:none;margin-bottom:1rem;padding:10px 14px;background:var(--bg-secondary);border-radius:var(--radius);border:0.5px solid var(--border);">
+
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+
+          <div id="lock-period-status" style="font-size:12px;font-family:var(--mono);color:var(--text-secondary);flex:1;"></div>
+
+          <button class="btn-outline" onclick="lockPeriod()" id="lock-btn" style="white-space:nowrap;font-size:12px;color:var(--danger-text);border-color:var(--danger-text);">&#128274; Lock this period</button>
+
+          <button class="btn-outline" onclick="unlockPeriod()" id="unlock-btn" style="white-space:nowrap;font-size:12px;">&#128275; Unlock this period</button>
+
+        </div>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th style="width:4%;text-align:center;"><input type="checkbox" id="select-all" onchange="toggleSelectAll()" title="Select all" /></th>
+
+              <th style="width:16%">User</th>
+
+              <th style="width:13%">Date</th>
+
+              <th style="width:9%">Hours</th>
+
+              <th style="width:19%">Category</th>
+
+              <th style="width:30%">Comment</th>
+
+              <th style="width:9%"></th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="entries-tbody"></tbody>
+
+        </table>
+
+      </div>
+
+      <div id="mass-split-bar" style="display:none;margin-top:1rem;padding:12px 14px;background:var(--bg-secondary);border-radius:var(--radius);border:0.5px solid var(--border);">
+
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+
+          <span id="mass-selected-count" style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;"></span>
+
+          <div style="flex:1;min-width:140px;">
+
+            <select id="mass-split-pct" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-weight:600;font-family:var(--mono);">
+
+              <option value="">&mdash; select split % &mdash;</option>
+
+            </select>
+
+          </div>
+
+          <div style="font-size:12px;color:var(--text-muted);">or</div>
+
+          <div style="flex:1;min-width:120px;">
+
+            <input type="number" id="mass-split-hours" min="0.01" step="0.25" placeholder="Report hrs each" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--mono);" oninput="onMassSplitInput('hours')" />
+
+          </div>
+
+          <button class="btn-primary" id="mass-execute-btn" onclick="executeMassSplit()" style="white-space:nowrap;">&#9988; Mass split</button>
+
+          <button class="btn-outline" onclick="clearSelection()" style="white-space:nowrap;font-size:12px;">Clear</button>
+
+        </div>
+
+        <div id="mass-split-progress" style="display:none;margin-top:10px;"></div>
+
+      </div>
+
+      <div id="pane-split" style="display:none;">
+
+        <div class="split-panel">
+
+          <h3>&#9988; Split time entry</h3>
+
+          <div class="entry-info" id="split-info"></div>
+
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:end;margin-bottom:1rem;">
+
+            <div class="field" style="margin-bottom:0;">
+
+              <label>Report % of hours <span style="font-weight:400;text-transform:none;letter-spacing:0;">(client-visible)</span></label>
+
+              <select id="split-pct" onchange="updateCalcFromPct()" style="width:100%;padding:8px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:15px;font-weight:600;font-family:var(--mono);">
+
+                <option value="">&mdash; select % &mdash;</option>
+
+              </select>
+
+            </div>
+
+            <div style="font-size:12px;color:var(--text-muted);padding-bottom:10px;text-align:center;">or</div>
+
+            <div class="field" style="margin-bottom:0;">
+
+              <label>Enter hours directly <span style="font-weight:400;text-transform:none;letter-spacing:0;">(client-visible)</span></label>
+
+              <input type="number" id="split-report" min="0.01" step="0.01" placeholder="0.00" oninput="updateCalcFromHours()" style="font-size:15px;font-weight:600;" />
+
+            </div>
+
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;">
+
+            <div style="background:var(--bg-secondary);border-radius:var(--radius);padding:10px 14px;border:0.5px solid var(--border);">
+
+              <div style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:4px;">Client-visible hours</div>
+
+              <div id="calc-reported" style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--text);">&mdash;</div>
+
+            </div>
+
+            <div style="background:var(--warning-bg);border-radius:var(--radius);padding:10px 14px;border:0.5px solid var(--warning-text);">
+
+              <div style="font-size:11px;font-weight:600;color:var(--warning-text);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:4px;">Internal &mdash; Non-Billable</div>
+
+              <div id="calc-overflow" style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--warning-text);">&mdash;</div>
+
+            </div>
+
+          </div>
+
+          <div class="calc-bar neutral" id="calc-bar">Select a percentage or enter hours above</div>
+
+          <div id="overflow-cat-badge" style="display:none;" class="cat-badge">
+
+            &#127991; <span id="overflow-cat-text"></span>
+
+          </div>
+
+          <div class="confirm-box" id="confirm-box" style="display:none;"></div>
+
+          <div id="preflight-panel" style="display:none;margin-bottom:1rem;">
+
+            <div style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px;">Pre-flight checks</div>
+
+            <div id="preflight-checks"></div>
+
+          </div>
+
+          <div class="action-row">
+
+            <button class="btn-primary" id="execute-btn" onclick="executeSplit()" disabled>Execute split</button>
+
+            <button class="btn-outline" onclick="cancelSplit()">Cancel</button>
+
+            <span class="result-msg" id="split-result"></span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- REPORT TAB -->
+
+  <div id="tab-report" class="app-body" style="display:none;">
+
+    <div id="report-status" class="status-bar"><div class="dot"></div>Use the search bar above to load a retainer, then generate the report</div>
+
+    <div style="display:flex;gap:10px;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
+
+      <button class="btn-primary" onclick="generateReport()">&#128196; Generate report</button>
+
+      <button class="btn-outline" id="refresh-wrike-btn" onclick="refreshReportData()" style="display:none;">&#8635; Refresh Wrike data</button>
+
+      <span style="font-size:12px;color:var(--text-muted);" id="refresh-hint"></span>
+
+    </div>
+
+    <div id="report-output" style="display:none;"></div>
+
+    <div id="email-composer" style="display:none;margin-top:1.5rem;">
+
+      <hr style="border:none;border-top:0.5px solid var(--border);margin-bottom:1.5rem;">
+
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:0.75rem;">&#9993; Email composer</div>
+
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:1rem;">Write your message below. It will appear above the report in the email. Use the toolbar to format text and add links.</p>
+
+      <div id="wysiwyg-toolbar" style="display:flex;gap:4px;flex-wrap:wrap;padding:6px 8px;background:var(--bg-secondary);border:0.5px solid var(--border-strong);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;">
+
+        <button onclick="fmt('bold')" title="Bold" class="toolbar-btn"><strong>B</strong></button>
+
+        <button onclick="fmt('italic')" title="Italic" class="toolbar-btn"><em>I</em></button>
+
+        <button onclick="fmt('underline')" title="Underline" class="toolbar-btn"><u>U</u></button>
+
+        <div style="width:0.5px;background:var(--border-strong);margin:0 4px;"></div>
+
+        <button onclick="fmt('insertUnorderedList')" title="Bullet list" class="toolbar-btn">&#8226; List</button>
+
+        <button onclick="fmt('insertOrderedList')" title="Numbered list" class="toolbar-btn">1. List</button>
+
+        <div style="width:0.5px;background:var(--border-strong);margin:0 4px;"></div>
+
+        <button onclick="insertLink()" title="Insert link" class="toolbar-btn">&#128279; Link</button>
+
+        <div style="width:0.5px;background:var(--border-strong);margin:0 4px;"></div>
+
+        <select onchange="fmt('fontSize', this.value); this.value='';" class="toolbar-btn" style="font-size:12px;padding:3px 6px;cursor:pointer;">
+
+          <option value="">Size</option>
+
+          <option value="1">Small</option>
+
+          <option value="3">Normal</option>
+
+          <option value="4">Large</option>
+
+          <option value="5">X-Large</option>
+
+        </select>
+
+        <div style="width:0.5px;background:var(--border-strong);margin:0 4px;"></div>
+
+        <button onclick="document.getElementById('wysiwyg-editor').innerHTML=''" title="Clear" class="toolbar-btn" style="color:var(--danger-text);">&#10005; Clear</button>
+
+      </div>
+
+      <div id="wysiwyg-editor" contenteditable="true"
+
+        style="min-height:140px;padding:12px 14px;border:0.5px solid var(--border-strong);border-radius:0 0 var(--radius) var(--radius);
+
+               background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;outline:none;font-family:inherit;">
+
+        <p>Dear [Client Name],</p>
+
+        <p>Please find your monthly retainer report below. Do not hesitate to reach out if you have any questions.</p>
+
+        <p>Best regards,<br>[Your Name]<br>Informatics, Inc.</p>
+
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap;align-items:center;">
+
+        <button class="btn-primary" onclick="previewEmail()">&#128065; Preview email</button>
+
+        <button class="btn-outline" onclick="copyEmailToClipboard()">&#128203; Copy to Outlook</button>
+
+        <button class="btn-outline" onclick="downloadEml()" style="border-color:var(--success-text);color:var(--success-text);">&#11015; Download as .eml</button>
+
+        <span style="font-size:11px;color:var(--text-muted);">Open .eml in Outlook to preserve all colors</span>
+
+      </div>
+
+      <div id="email-preview-panel" style="display:none;margin-top:1.5rem;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+
+          <div style="font-size:13px;font-weight:600;color:var(--text);">Email preview</div>
+
+          <button class="btn-sm" onclick="document.getElementById('email-preview-panel').style.display='none'">&#10005; Close</button>
+
+        </div>
+
+        <div id="email-preview-frame" style="border:0.5px solid var(--border-strong);border-radius:var(--radius);overflow:hidden;"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CSM OVERVIEW TAB -->
+
+  <div id="tab-csm" class="app-body" style="display:none;">
+
+    <div id="csm-status" class="status-bar"><div class="dot"></div>Click Load to fetch all projects from Wrike</div>
+
+    <div style="display:flex;gap:12px;margin-bottom:1rem;align-items:flex-end;flex-wrap:wrap;">
+
+      <div style="flex:1;min-width:200px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Filter by CSM</label>
+
+        <select id="csm-filter" onchange="filterCSMTable()" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+          <option value="">All CSMs</option>
+
+        </select>
+
+      </div>
+
+      <div style="flex:1;min-width:200px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Filter by project name</label>
+
+        <input type="text" id="csm-name-filter" placeholder="Search project name..." oninput="filterCSMTable()" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;" />
+
+      </div>
+
+      <button class="btn-primary" onclick="loadCSMProjects()">&#8635; Load projects</button>
+
+      <span id="csm-count" style="font-size:12px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;"></span>
+
+    </div>
+
+    <div class="table-wrap" id="csm-table-wrap" style="display:none;">
+
+      <table style="width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;">
+
+        <thead>
+
+          <tr>
+
+            <th style="width:18%;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);">CSM</th>
+
+            <th style="width:9%;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);">SOW</th>
+
+            <th style="width:35%;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);">Project name</th>
+
+            <th style="width:12%;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);">Status</th>
+
+            <th style="width:13%;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);">Start</th>
+
+            <th style="width:13%;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);">End</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="csm-tbody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- STAFFING & ROLE REPORT TAB -->
+
+  <div id="tab-staffing" class="app-body" style="display:none;">
+
+    <div id="staffing-status" class="status-bar"><div class="dot"></div>Set filters and click Generate Report</div>
+
+    <div style="display:flex;gap:12px;margin-bottom:1rem;align-items:flex-end;flex-wrap:wrap;">
+
+      <div style="flex:1;min-width:160px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Client</label>
+
+        <select id="staffing-client-filter" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+          <option value="">All Clients</option>
+
+        </select>
+
+      </div>
+
+      <div style="flex:1;min-width:120px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">SOW number</label>
+
+        <input type="text" id="staffing-sow-filter" placeholder="e.g. 25415" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--mono);" />
+
+      </div>
+
+      <div style="flex:2;min-width:180px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Project name</label>
+
+        <input type="text" id="staffing-project-filter" placeholder="Search project name..." style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;" />
+
+      </div>
+
+      <div style="flex:1;min-width:140px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Assignee</label>
+
+        <select id="staffing-user-filter" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+          <option value="">All Users</option>
+
+        </select>
+
+      </div>
+
+      <div style="flex:1;min-width:140px;">
+
+        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;">Task type / Role</label>
+
+        <select id="staffing-role-filter" style="width:100%;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;">
+
+          <option value="">All Roles</option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
+
+      <button class="btn-primary" onclick="generateStaffingReport()">&#128196; Generate report</button>
+
+      <button class="btn-outline" id="staffing-clear-btn" onclick="clearStaffingFilters()" style="display:none;">&#10005; Clear filters</button>
+
+      <span id="staffing-count" style="font-size:12px;color:var(--text-muted);font-family:var(--mono);"></span>
+
+    </div>
+
+    <div id="staffing-output" style="display:none;"></div>
+
+  </div>
+
+</div>
+
+<script>
+
+  let token = 'eyJ0dCI6InAiLCJhbGciOiJIUzI1NiIsInR2IjoiMiJ9.eyJkIjoie1wiYVwiOjY3MjA1OTcsXCJpXCI6OTc2NDE0OSxcImNcIjo0NzIxMzQ3LFwidVwiOjIxMjcwMTg0LFwiclwiOlwiVVNcIixcInNcIjpbXCJXXCIsXCJGXCIsXCJJXCIsXCJVXCIsXCJLXCIsXCJDXCIsXCJEXCIsXCJNXCIsXCJBXCIsXCJMXCIsXCJQXCJdLFwielwiOltdLFwidFwiOjB9IiwiaWF0IjoxNzgwNTgyNzMwfQ.oNe-8tzaWaj5EtGxJxn8pnL-I0YM1plwTEKXRnb61Y4';
+
+  let userTokenMap = {};
+
+  let selectedEntry = null;
+
+  let allEntries = [];
+
+  let contactMap = {};
+
+  let taskMap = {};
+
+  let categoryMap = {};
+
+  let nonBillableCategoryId = null;
+
+  const NON_BILLABLE_NAME = 'Internal - Non-Billable';
+
+  const BASE = 'https://www.wrike.com/api/v4';
+
+  function setStatus(msg, type='') {
+
+    const el = document.getElementById('status');
+
+    el.className = 'status-bar' + (type ? ' '+type : '');
+
+    const pulse = type === 'loading' ? ' pulse' : '';
+
+    el.innerHTML = `<div class="dot${pulse}"></div>${msg}`;
+
+  }
+
+  function stepDone(n) {
+
+    const el = document.getElementById('sn'+n);
+
+    el.className = 'snum done';
+
+    el.textContent = '\u2713';
+
+  }
+
+  function stepActive(n) {
+
+    document.getElementById('sn'+n).className = 'snum active';
+
+  }
+
+  async function apiFetch(path, opts={}) {
+
+    const res = await fetch(BASE + path, {
+
+      headers: { 'Authorization': 'Bearer '+token, 'Content-Type': 'application/json', ...(opts.headers||{}) },
+
+      method: opts.method || 'GET',
+
+      body: opts.body || undefined
+
+    });
+
+    if (!res.ok) {
+
+      const txt = await res.text();
+
+      throw new Error(`API error ${res.status}: ${txt}`);
+
+    }
+
+    return res.json();
+
+  }
+
+  function chunk(arr, n) {
+
+    const out = [];
+
+    for (let i=0; i<arr.length; i+=n) out.push(arr.slice(i,i+n));
+
+    return out;
+
+  }
+
+  function trunc(s, n) {
+
+    if (!s) return '\u2014';
+
+    return s.length > n ? s.slice(0,n)+'\u2026' : s;
+
+  }
+
+  async function connectWrike() {
+
+    setStatus('Connecting to Wrike...', 'loading');
+
+    try {
+
+      const me = await apiFetch('/contacts?me=true');
+
+      const u = me.data[0];
+
+      setStatus(`Connected as ${u.firstName} ${u.lastName} \u2014 loading team & categories...`, 'loading');
+
+      await Promise.all([loadCategories(), loadAllContacts()]);
+
+      stepDone(1); stepActive(2);
+
+      document.getElementById('pane-query').style.display = 'block';
+
+      const now = new Date();
+
+      const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0');
+
+      const last = new Date(y, now.getMonth()+1, 0).getDate();
+
+      document.getElementById('date-start').value = `${y}-${m}-01`;
+
+      document.getElementById('date-end').value = `${y}-${m}-${String(last).padStart(2,'0')}`;
+
+      setStatus(`Connected as ${u.firstName} ${u.lastName}`, 'success');
+
+      populateCsmDropdown();
+
+      prefetchCsmList();
+
+    } catch(e) {
+
+      setStatus('Connection failed: ' + e.message, 'error');
+
+    }
+
+  }
+
+  const WRIKE_TOKEN_FIELD_ID = 'IEAGNDCVJUAMQF5T';
+
+  let csmContacts = [];
+
+  async function loadAllContacts() {
+
+    const res = await apiFetch('/contacts?deleted=false&fields=%5BcustomFields%5D');
+
+    const contacts = res.data || [];
+
+    contacts.forEach(c => {
+
+      if (c.type === 'Person' && c.active !== false) {
+
+        contactMap[c.id] = c.firstName + ' ' + c.lastName;
+
+      }
+
+    });
+
+  }
+
+  function populateCsmDropdown() {
+
+    const sel = document.getElementById('csm-filter');
+
+    if (!sel) return;
+
+    const current = sel.value;
+
+    sel.innerHTML = '<option value="">All CSMs</option>';
+
+    csmContacts.forEach(c => {
+
+      const name = c.firstName + ' ' + c.lastName;
+
+      const opt = document.createElement('option');
+
+      opt.value = name;
+
+      opt.textContent = name;
+
+      if (name === current) opt.selected = true;
+
+      sel.appendChild(opt);
+
+    });
+
+  }
+
+  async function prefetchCsmList() {
+
+    try {
+
+      let allFolders = [];
+
+      let nextPageToken = null;
+
+      do {
+
+        const pagePart = nextPageToken ? `&nextPageToken=${encodeURIComponent(nextPageToken)}` : '';
+
+        const res = await apiFetch(`/spaces/IEAGNDCVI5PUIXRQ/folders?project=true&fields=%5B%22customFields%22%5D&pageSize=200${pagePart}`);
+
+        allFolders = allFolders.concat(res.data || []);
+
+        nextPageToken = res.nextPageToken || null;
+
+      } while (nextPageToken);
+
+      const csmNames = new Set();
+
+      allFolders.forEach(f => {
+
+        if (!f.project) return;
+
+        const cfs = f.customFields || [];
+
+        const csmField = cfs.find(cf => cf.id === CSM_WRIKE_ID_FIELD);
+
+        if (!csmField || !csmField.value) return;
+
+        const wrikeId = csmField.value.trim();
+
+        const name = contactMap[wrikeId];
+
+        if (name) csmNames.add(name);
+
+      });
+
+      const sel = document.getElementById('csm-filter');
+
+      if (!sel) return;
+
+      const current = sel.value;
+
+      sel.innerHTML = '<option value="">All CSMs</option>';
+
+      [...csmNames].sort().forEach(name => {
+
+        const opt = document.createElement('option');
+
+        opt.value = name;
+
+        opt.textContent = name;
+
+        if (name === current) opt.selected = true;
+
+        sel.appendChild(opt);
+
+      });
+
+      const clientNames = new Set();
+
+      allFolders.forEach(f => {
+
+        if (!f.project) return;
+
+        const cfs = f.customFields || [];
+
+        const cf = cfs.find(c => c.id === STAFFING_CLIENT_FIELD);
+
+        if (cf && cf.value) clientNames.add(cf.value.trim());
+
+      });
+
+      const clientSel = document.getElementById('staffing-client-filter');
+
+      if (clientSel) {
+
+        const currentClient = clientSel.value;
+
+        clientSel.innerHTML = '<option value="">All Clients</option>';
+
+        [...clientNames].sort().forEach(name => {
+
+          const opt = document.createElement('option');
+
+          opt.value = name; opt.textContent = name;
+
+          if (name === currentClient) opt.selected = true;
+
+          clientSel.appendChild(opt);
+
+        });
+
+      }
+
+    } catch(e) {}
+
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+
+    [document.getElementById('split-pct'), document.getElementById('mass-split-pct')].forEach(sel => {
+
+      for (let p = 95; p >= 5; p -= 5) {
+
+        const opt = document.createElement('option');
+
+        opt.value = p;
+
+        opt.textContent = p + '%';
+
+        sel.appendChild(opt);
+
+      }
+
+    });
+
+    connectWrike();
+
+  });
+
+  async function loadCategories() {
+
+    const res = await apiFetch('/timelog_categories');
+
+    const cats = res.data || [];
+
+    cats.forEach(c => { categoryMap[c.id] = c.name; });
+
+    const match = cats.find(c => c.name === NON_BILLABLE_NAME);
+
+    const banner = document.getElementById('cat-status-banner');
+
+    if (match) {
+
+      nonBillableCategoryId = match.id;
+
+      banner.innerHTML = `<div class="cat-found">\u2713 "${NON_BILLABLE_NAME}" category found and ready</div>`;
+
+    } else {
+
+      banner.innerHTML = `<div class="cat-missing">\u26a0 "${NON_BILLABLE_NAME}" category not found \u2014 create it in Wrike Account Management > Time Tracking before splitting</div>`;
+
+    }
+
+  }
+
+  const SOW_FIELD_ID = 'IEAGNDCVJUAKDCLF';
+
+  let loadedProjects = [];
+
+  function onSearchInput(mode) {
+
+    if (mode === 'sow') document.getElementById('project-search').value = '';
+
+    if (mode === 'name') document.getElementById('sow-search').value = '';
+
+    document.getElementById('projects-found').style.display = 'none';
+
+    loadedProjects = [];
+
+  }
+
+  async function loadEntries() {
+
+    const sowVal = document.getElementById('sow-search').value.trim();
+
+    const projectName = document.getElementById('project-search').value.trim();
+
+    const ds = document.getElementById('date-start').value;
+
+    const de = document.getElementById('date-end').value;
+
+    if (!sowVal && !projectName) { setStatus('Enter a SOW number or project name', 'error'); return; }
+
+    if (!ds || !de) { setStatus('Select a date range', 'error'); return; }
+
+    document.getElementById('load-btn').disabled = true;
+
+    document.getElementById('pane-entries').style.display = 'none';
+
+    document.getElementById('pane-split').style.display = 'none';
+
+    document.getElementById('projects-found').style.display = 'none';
+
+    selectedEntry = null;
+
+    try {
+
+      let projects = [];
+
+      if (sowVal) {
+
+        setStatus(`Searching for SOW ${sowVal}...`, 'loading');
+
+        let allFolders = [];
+
+        let nextPageToken = null;
+
+        do {
+
+          const pagePart = nextPageToken ? `&nextPageToken=${nextPageToken}` : '';
+
+          const sr = await apiFetch(`/spaces/IEAGNDCVI5PUIXRQ/folders?project=true&fields=%5B%22customFields%22%5D&pageSize=200${pagePart}`);
+
+          allFolders = allFolders.concat(sr.data || []);
+
+          nextPageToken = sr.nextPageToken || null;
+
+        } while (nextPageToken);
+
+        projects = allFolders.filter(f => {
+
+          const cfs = f.customFields || [];
+
+          return cfs.some(cf => cf.id === SOW_FIELD_ID && String(cf.value) === String(sowVal));
+
+        });
+
+        if (projects.length === 0) {
+
+          setStatus(`No projects found with SOW number "${sowVal}"`, 'error');
+
+          document.getElementById('load-btn').disabled = false;
+
+          return;
+
+        }
+
+      } else {
+
+        setStatus(`Searching for project "${projectName}"...`, 'loading');
+
+        const sr = await apiFetch(`/folders?title=${encodeURIComponent(projectName)}&project=true`);
+
+        projects = sr.data || [];
+
+        if (projects.length === 0) {
+
+          setStatus(`No project found matching "${projectName}"`, 'error');
+
+          document.getElementById('load-btn').disabled = false;
+
+          return;
+
+        }
+
+      }
+
+      loadedProjects = projects;
+
+      lockPeriodProjects = projects;
+
+      const projectsDiv = document.getElementById('projects-found');
+
+      const label = sowVal
+
+        ? `${projects.length} project${projects.length > 1 ? 's' : ''} found for SOW ${sowVal}`
+
+        : 'Project found';
+
+      projectsDiv.innerHTML = `
+
+        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px;">${label}</div>
+
+        ${projects.map(p => `
+
+          <div style="font-size:12px;padding:5px 10px;background:var(--bg-secondary);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:4px;font-family:var(--mono);">
+
+            &#8627; ${trunc(p.title, 80)}
+
+          </div>`).join('')}
+
+      `;
+
+      projectsDiv.style.display = 'block';
+
+      setStatus(`Loading time entries from ${projects.length} project${projects.length > 1 ? 's' : ''}...`, 'loading');
+
+      const trackedDate = encodeURIComponent(JSON.stringify({ start: ds, end: de }));
+
+      const allResults = [];
+
+      for (const project of projects) {
+
+        const tr = await apiFetch(`/folders/${project.id}/timelogs?descendants=true&fields=%5BlockStatus%5D&trackedDate=${trackedDate}`);
+
+        if (tr.data && tr.data.length > 0) {
+
+          allResults.push(...tr.data);
+
+        }
+
+      }
+
+      if (allResults.length === 0) {
+
+        setStatus('No time entries found for this date range', 'error');
+
+        document.getElementById('load-btn').disabled = false;
+
+        return;
+
+      }
+
+      allEntries = dedupeById(allResults);
+
+      const taskIds = [...new Set(allEntries.map(e => e.taskId))];
+
+      const userIds = [...new Set(allEntries.map(e => e.userId))];
+
+      for (const ch of chunk(taskIds, 100)) {
+
+        const r = await apiFetch(`/tasks/${ch.join(',')}`);
+
+        r.data.forEach(t => { taskMap[t.id] = t.title; });
+
+      }
+
+      for (const ch of chunk(userIds, 100)) {
+
+        const r = await apiFetch(`/contacts/${ch.join(',')}`);
+
+        r.data.forEach(u => { contactMap[u.id] = u.firstName + ' ' + u.lastName; });
+
+      }
+
+      renderEntries(allEntries);
+
+      stepDone(2); stepActive(3);
+
+      showLockBar();
+
+      const titleStr = sowVal ? `SOW ${sowVal}` : trunc(projects[0].title, 45);
+
+      setStatus(`Loaded ${allEntries.length} time entries across ${projects.length} project${projects.length > 1 ? 's' : ''} for ${titleStr}`, 'success');
+
+    } catch(e) {
+
+      setStatus('Error loading entries: ' + e.message, 'error');
+
+    }
+
+    document.getElementById('load-btn').disabled = false;
+
+  }
+
+  function renderEntries(entries) {
+
+    document.getElementById('pane-entries').style.display = 'block';
+
+    populateFilters(entries);
+
+    applyFilters();
+
+  }
+
+  function getFiltered() {
+
+    const taskVal = document.getElementById('filter-task').value;
+
+    const personVal = document.getElementById('filter-person').value;
+
+    const catVal = document.getElementById('filter-category').value;
+
+    let filtered = [...allEntries];
+
+    if (taskVal) filtered = filtered.filter(e => e.taskId === taskVal);
+
+    if (personVal) filtered = filtered.filter(e => e.userId === personVal);
+
+    if (catVal === '__none__') filtered = filtered.filter(e => !e.categoryId);
+
+    else if (catVal) filtered = filtered.filter(e => e.categoryId === catVal);
+
+    return filtered;
+
+  }
+
+  function updateSummary(filtered) {
+
+    const total = filtered.reduce((s,e) => s+e.hours, 0);
+
+    const billable = filtered.filter(e => e.categoryId !== nonBillableCategoryId).reduce((s,e) => s+e.hours, 0);
+
+    const internal = filtered.filter(e => e.categoryId === nonBillableCategoryId).reduce((s,e) => s+e.hours, 0);
+
+    document.getElementById('sum-total').textContent = total.toFixed(2) + ' hrs';
+
+    document.getElementById('sum-billable').textContent = billable.toFixed(2) + ' hrs';
+
+    document.getElementById('sum-internal').textContent = internal.toFixed(2) + ' hrs';
+
+    document.getElementById('sum-count').textContent = filtered.length;
+
+  }
+
+  function populateFilters(entries) {
+
+    const taskSel = document.getElementById('filter-task');
+
+    const personSel = document.getElementById('filter-person');
+
+    const catSel = document.getElementById('filter-category');
+
+    const currentTask = taskSel.value;
+
+    const currentPerson = personSel.value;
+
+    const currentCat = catSel.value;
+
+    const taskIds = [...new Set(entries.map(e => e.taskId))];
+
+    const userIds = [...new Set(entries.map(e => e.userId))];
+
+    const catIds = [...new Set(entries.map(e => e.categoryId).filter(Boolean))];
+
+    taskSel.innerHTML = '<option value="">All tasks</option>';
+
+    taskIds.forEach(tid => {
+
+      const name = taskMap[tid] || tid;
+
+      const opt = document.createElement('option');
+
+      opt.value = tid;
+
+      opt.textContent = trunc(name, 55);
+
+      if (tid === currentTask) opt.selected = true;
+
+      taskSel.appendChild(opt);
+
+    });
+
+    personSel.innerHTML = '<option value="">All people</option>';
+
+    userIds.forEach(uid => {
+
+      const name = contactMap[uid] || uid;
+
+      const opt = document.createElement('option');
+
+      opt.value = uid;
+
+      opt.textContent = name;
+
+      if (uid === currentPerson) opt.selected = true;
+
+      personSel.appendChild(opt);
+
+    });
+
+    catSel.innerHTML = '<option value="">All categories</option><option value="__none__">No category</option>';
+
+    catIds.forEach(cid => {
+
+      const name = categoryMap[cid] || cid;
+
+      const opt = document.createElement('option');
+
+      opt.value = cid;
+
+      opt.textContent = name;
+
+      if (cid === currentCat) opt.selected = true;
+
+      catSel.appendChild(opt);
+
+    });
+
+  }
+
+  function applyFilters() {
+
+    const scrollY = window.scrollY;
+
+    const filtered = getFiltered();
+
+    const hasFilter = document.getElementById('filter-task').value ||
+
+                      document.getElementById('filter-person').value ||
+
+                      document.getElementById('filter-category').value;
+
+    const countEl = document.getElementById('filter-count');
+
+    countEl.textContent = hasFilter ? `${filtered.length} of ${allEntries.length} entries` : '';
+
+    updateSummary(filtered);
+
+    renderTable(filtered);
+
+    window.scrollTo({ top: scrollY, behavior: 'instant' });
+
+  }
+
+  function clearFilters() {
+
+    const scrollY = window.scrollY;
+
+    document.getElementById('filter-task').value = '';
+
+    document.getElementById('filter-person').value = '';
+
+    document.getElementById('filter-category').value = '';
+
+    document.getElementById('filter-count').textContent = '';
+
+    updateSummary(allEntries);
+
+    renderTable(allEntries);
+
+    window.scrollTo({ top: scrollY, behavior: 'instant' });
+
+  }
+
+  function renderTable(entries) {
+
+    const byTask = {};
+
+    entries.forEach(e => {
+
+      if (!byTask[e.taskId]) byTask[e.taskId] = [];
+
+      byTask[e.taskId].push(e);
+
+    });
+
+    const tbody = document.getElementById('entries-tbody');
+
+    tbody.innerHTML = '';
+
+    if (entries.length === 0) {
+
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px;">No entries match the current filters</td></tr>';
+
+      return;
+
+    }
+
+    Object.entries(byTask).forEach(([taskId, taskEntries]) => {
+
+      const title = taskMap[taskId] || taskId;
+
+      const gr = document.createElement('tr');
+
+      gr.className = 'task-group-row';
+
+      gr.innerHTML = `<td colspan="7">&#8627; ${trunc(title, 90)}</td>`;
+
+      tbody.appendChild(gr);
+
+      taskEntries.sort((a,b) => new Date(b.trackedDate) - new Date(a.trackedDate));
+
+      taskEntries.forEach(entry => {
+
+        const row = document.createElement('tr');
+
+        row.dataset.id = entry.id;
+
+        const user = contactMap[entry.userId] || entry.userId;
+
+        const rawDate = entry.trackedDate ? entry.trackedDate.split('T')[0] : null;
+
+        const dateDisplay = rawDate
+
+          ? (() => {
+
+              const d = new Date(rawDate + 'T12:00:00');
+
+              const mm = String(d.getMonth()+1).padStart(2,'0');
+
+              const dd = String(d.getDate()).padStart(2,'0');
+
+              const yy = String(d.getFullYear()).slice(-2);
+
+              return `${mm}/${dd}/${yy}`;
+
+            })()
+
+          : '\u2014';
+
+        const catId = entry.categoryId;
+
+        const catName = catId ? (categoryMap[catId] || catId) : null;
+
+        const isNonBillable = catId === nonBillableCategoryId;
+
+        const catTag = catName
+
+          ? `<span class="tag ${isNonBillable ? 'tag-orange' : 'tag-muted'}">${trunc(catName, 22)}</span>`
+
+          : '<span style="color:var(--text-muted);font-size:12px;">\u2014</span>';
+
+        const isLocked = entry.lockStatus === 'Locked';
+
+        const checkbox = (!isNonBillable && !isLocked)
+
+          ? `<input type="checkbox" class="entry-checkbox" data-id="${entry.id}" onchange="onCheckboxChange()" style="cursor:pointer;" />`
+
+          : '<span></span>';
+
+        const splitBtn = (!isNonBillable && !isLocked)
+
+          ? `<button class="btn-sm" onclick="selectEntry('${entry.id}')">Split</button>`
+
+          : isLocked
+
+            ? '<span style="font-size:11px;color:var(--text-muted);">&#128274;</span>'
+
+            : '<span style="font-size:11px;color:var(--text-muted);">\u2014</span>';
+
+        row.innerHTML = `
+
+          <td style="text-align:center;">${checkbox}</td>
+
+          <td style="font-size:12px;${isLocked ? 'color:var(--text-muted);' : ''}">${trunc(user,20)}</td>
+
+          <td style="font-size:12px;white-space:nowrap;${isLocked ? 'color:var(--text-muted);' : ''}">${dateDisplay}</td>
+
+          <td style="font-family:var(--mono);font-weight:600;${isLocked ? 'color:var(--text-muted);' : ''}">${entry.hours.toFixed(2)}</td>
+
+          <td>${catTag}${isLocked ? ' <span class="tag tag-muted" style="font-size:10px;">&#128274; locked</span>' : ''}</td>
+
+          <td style="font-size:11px;color:var(--text-muted);white-space:normal;word-break:break-word;">${entry.comment||'\u2014'}</td>
+
+          <td>${splitBtn}</td>
+
+        `;
+
+        tbody.appendChild(row);
+
+      });
+
+    });
+
+    updateMassSplitBar();
+
+  }
+
+  function selectEntry(id) {
+
+    selectedEntry = allEntries.find(e => e.id === id);
+
+    if (!selectedEntry) return;
+
+    if (!nonBillableCategoryId) {
+
+      setStatus(`"${NON_BILLABLE_NAME}" category not found \u2014 create it in Wrike first`, 'error');
+
+      return;
+
+    }
+
+    document.querySelectorAll('#entries-tbody tr[data-id]').forEach(r => r.classList.remove('selected'));
+
+    document.querySelector(`tr[data-id="${id}"]`)?.classList.add('selected');
+
+    const user = contactMap[selectedEntry.userId] || selectedEntry.userId;
+
+    const task = taskMap[selectedEntry.taskId] || selectedEntry.taskId;
+
+    const date = selectedEntry.trackedDate ? selectedEntry.trackedDate.split('T')[0] : '\u2014';
+
+    document.getElementById('split-info').innerHTML =
+
+      `User: <strong>${user}</strong><br>Task: <strong>${trunc(task, 70)}</strong><br>Date: <strong>${date}</strong><br>Original hours: <strong>${selectedEntry.hours.toFixed(2)}</strong>`;
+
+    document.getElementById('split-pct').value = '';
+
+    document.getElementById('split-report').value = '';
+
+    document.getElementById('calc-reported').textContent = '\u2014';
+
+    document.getElementById('calc-overflow').textContent = '\u2014';
+
+    document.getElementById('calc-bar').textContent = 'Select a percentage or enter hours above';
+
+    document.getElementById('calc-bar').className = 'calc-bar neutral';
+
+    document.getElementById('confirm-box').style.display = 'none';
+
+    document.getElementById('overflow-cat-badge').style.display = 'none';
+
+    document.getElementById('execute-btn').disabled = true;
+
+    document.getElementById('execute-btn').textContent = 'Execute split';
+
+    document.getElementById('split-result').textContent = '';
+
+    document.getElementById('preflight-panel').style.display = 'none';
+
+    document.getElementById('preflight-checks').innerHTML = '';
+
+    document.getElementById('pane-split').style.display = 'block';
+
+    document.getElementById('pane-split').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  }
+
+  function updateCalcFromPct() {
+
+    const pct = parseFloat(document.getElementById('split-pct').value);
+
+    if (isNaN(pct) || !selectedEntry) return;
+
+    const reported = parseFloat((selectedEntry.hours * pct / 100).toFixed(2));
+
+    document.getElementById('split-report').value = reported;
+
+    updateCalc(reported);
+
+  }
+
+  function updateCalcFromHours() {
+
+    document.getElementById('split-pct').value = '';
+
+    const reported = parseFloat(document.getElementById('split-report').value);
+
+    updateCalc(reported);
+
+  }
+
+  function updateCalc(reported) {
+
+    if (!selectedEntry) return;
+
+    const total = selectedEntry.hours;
+
+    const bar = document.getElementById('calc-bar');
+
+    const execBtn = document.getElementById('execute-btn');
+
+    const confirmBox = document.getElementById('confirm-box');
+
+    const catBadge = document.getElementById('overflow-cat-badge');
+
+    const preflightPanel = document.getElementById('preflight-panel');
+
+    if (isNaN(reported) || reported <= 0) {
+
+      document.getElementById('calc-reported').textContent = '\u2014';
+
+      document.getElementById('calc-overflow').textContent = '\u2014';
+
+      bar.textContent = 'Select a percentage or enter hours above';
+
+      bar.className = 'calc-bar neutral';
+
+      execBtn.disabled = true;
+
+      confirmBox.style.display = 'none';
+
+      catBadge.style.display = 'none';
+
+      preflightPanel.style.display = 'none';
+
+      return;
+
+    }
+
+    const overflow = parseFloat((total - reported).toFixed(2));
+
+    document.getElementById('calc-reported').textContent = reported.toFixed(2) + ' hrs';
+
+    document.getElementById('calc-overflow').textContent = overflow.toFixed(2) + ' hrs';
+
+    if (reported >= total) {
+
+      bar.textContent = reported === total ? 'No change \u2014 reported hours equal original' : `Cannot exceed original ${total.toFixed(2)} hrs`;
+
+      bar.className = 'calc-bar invalid';
+
+      execBtn.disabled = true;
+
+      confirmBox.style.display = 'none';
+
+      catBadge.style.display = 'none';
+
+      preflightPanel.style.display = 'none';
+
+    } else {
+
+      bar.textContent = `\u2713  ${reported.toFixed(2)} hrs client-visible  \u00b7  ${overflow.toFixed(2)} hrs internal`;
+
+      bar.className = overflow < 0.25 ? 'calc-bar invalid' : 'calc-bar valid';
+
+      document.getElementById('overflow-cat-text').textContent = `Overflow entry will be tagged: "${NON_BILLABLE_NAME}"`;
+
+      catBadge.style.display = 'flex';
+
+      const user = contactMap[selectedEntry.userId] || selectedEntry.userId;
+
+      if (overflow < 0.25) {
+
+        confirmBox.innerHTML = `
+
+          <strong>\u26a0 Small overflow warning:</strong> The internal entry will be <strong>${overflow.toFixed(2)} hrs (${Math.round(overflow * 60)} min)</strong> \u2014 less than the typical 0.25 hr minimum.<br><br>
+
+          This will reduce <strong>${user}</strong>'s entry from <strong>${total.toFixed(2)} \u2192 ${reported.toFixed(2)} hrs</strong> and create a new <strong>${overflow.toFixed(2)} hr</strong> entry tagged <strong>"${NON_BILLABLE_NAME}"</strong>.<br><br>
+
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+
+            <input type="checkbox" id="small-overflow-ack" onchange="onSmallOverflowAck()" style="cursor:pointer;" />
+
+            I understand the overflow is less than 0.25 hrs and want to proceed
+
+          </label>`;
+
+        confirmBox.style.display = 'block';
+
+        execBtn.disabled = true;
+
+      } else {
+
+        confirmBox.innerHTML = `This will reduce <strong>${user}</strong>'s entry from <strong>${total.toFixed(2)} \u2192 ${reported.toFixed(2)} hrs</strong> (client-visible), and create a new <strong>${overflow.toFixed(2)} hr</strong> entry on the same task tagged <strong>"${NON_BILLABLE_NAME}"</strong>. This action writes to Wrike.`;
+
+        confirmBox.style.display = 'block';
+
+        execBtn.disabled = true;
+
+      }
+
+      document.getElementById('preflight-checks').innerHTML = '';
+
+      runPreflight();
+
+    }
+
+  }
+
+  function onSmallOverflowAck() {
+
+    const ack = document.getElementById('small-overflow-ack');
+
+    const execBtn = document.getElementById('execute-btn');
+
+    const checks = document.getElementById('preflight-checks');
+
+    const hasFail = checks && checks.innerHTML.includes('\u2717');
+
+    if (ack && ack.checked && !hasFail) {
+
+      execBtn.disabled = false;
+
+      execBtn.textContent = '\u2713 Execute split';
+
+    } else {
+
+      execBtn.disabled = true;
+
+      execBtn.textContent = 'Execute split';
+
+    }
+
+  }
+
+  let preflightRunId = 0;
+
+  async function runPreflight() {
+
+    const runId = ++preflightRunId;
+
+    const panel = document.getElementById('preflight-panel');
+
+    const checks = document.getElementById('preflight-checks');
+
+    const execBtn = document.getElementById('execute-btn');
+
+    panel.style.display = 'block';
+
+    execBtn.disabled = true;
+
+    const userId = selectedEntry.userId;
+
+    const userName = contactMap[userId] || userId;
+
+    const checkItem = (label, status, detail='') => {
+
+      const icon = status === 'pass' ? '\u2713' : status === 'fail' ? '\u2717' : '\u2026';
+
+      const color = status === 'pass' ? 'var(--success-text)' : status === 'fail' ? 'var(--danger-text)' : 'var(--text-muted)';
+
+      return `<div style="display:flex;align-items:baseline;gap:8px;padding:4px 0;font-size:12px;">
+
+        <span style="font-family:var(--mono);font-weight:600;color:${color};min-width:14px;">${icon}</span>
+
+        <span style="color:var(--text);">${label}</span>
+
+        ${detail ? `<span style="color:var(--text-muted);font-size:11px;">${detail}</span>` : ''}
+
+      </div>`;
+
+    };
+
+    checks.innerHTML = checkItem('Verifying category exists', 'pending') +
+
+                       checkItem('Retrieving user token', 'pending') +
+
+                       checkItem('Validating user token', 'pending') +
+
+                       checkItem('Confirming task is accessible', 'pending');
+
+    const checkResults = { category: false, tokenFound: false, tokenValid: false, taskAccessible: false };
+
+    try {
+
+      const catRes = await apiFetch('/timelog_categories');
+
+      const match = (catRes.data || []).find(c => c.id === nonBillableCategoryId);
+
+      checkResults.category = !!match;
+
+    } catch(e) { checkResults.category = false; }
+
+    if (runId !== preflightRunId) return;
+
+    let userToken = null;
+
+    try {
+
+      const contactRes = await apiFetch(`/contacts/${userId}?fields=%5BcustomFields%5D`);
+
+      const contact = contactRes.data && contactRes.data[0];
+
+      const tokenField = (contact && contact.customFields || []).find(f => f.id === WRIKE_TOKEN_FIELD_ID);
+
+      userToken = tokenField && tokenField.value;
+
+      checkResults.tokenFound = !!userToken;
+
+    } catch(e) { checkResults.tokenFound = false; }
+
+    if (runId !== preflightRunId) return;
+
+    if (userToken) {
+
+      try {
+
+        const testRes = await fetch(`${BASE}/contacts?me=true`, {
+
+          headers: { 'Authorization': 'Bearer ' + userToken }
+
+        });
+
+        checkResults.tokenValid = testRes.ok;
+
+      } catch(e) { checkResults.tokenValid = false; }
+
+    }
+
+    if (runId !== preflightRunId) return;
+
+    try {
+
+      const taskRes = await apiFetch(`/tasks/${selectedEntry.taskId}`);
+
+      checkResults.taskAccessible = !!(taskRes.data && taskRes.data[0]);
+
+    } catch(e) { checkResults.taskAccessible = false; }
+
+    if (runId !== preflightRunId) return;
+
+    const allPassed = checkResults.category && checkResults.tokenFound && checkResults.tokenValid && checkResults.taskAccessible;
+
+    checks.innerHTML =
+
+      checkItem(`Category "${NON_BILLABLE_NAME}" exists`, checkResults.category ? 'pass' : 'fail',
+
+        checkResults.category ? '' : 'Create it in Wrike Account Management > Time Tracking') +
+
+      checkItem(`Token found for ${userName}`, checkResults.tokenFound ? 'pass' : 'fail',
+
+        checkResults.tokenFound ? '' : `Add WrikeAPITokenForClaude to ${userName}'s profile in Wrike`) +
+
+      checkItem('Token is valid', checkResults.tokenValid ? 'pass' : 'fail',
+
+        checkResults.tokenValid ? '' : checkResults.tokenFound ? 'Token may be expired or revoked \u2014 regenerate it' : 'Cannot check \u2014 token not found') +
+
+      checkItem('Task is accessible', checkResults.taskAccessible ? 'pass' : 'fail',
+
+        checkResults.taskAccessible ? '' : 'Task may have been deleted or moved');
+
+    if (!allPassed) {
+
+      execBtn.disabled = true;
+
+      execBtn.textContent = 'Execute split';
+
+      setStatus('Pre-flight checks failed \u2014 resolve issues above before splitting', 'error');
+
+    } else {
+
+      const ackBox = document.getElementById('small-overflow-ack');
+
+      const needsAck = ackBox !== null;
+
+      const ackGiven = ackBox && ackBox.checked;
+
+      execBtn.disabled = needsAck && !ackGiven;
+
+      execBtn.textContent = (!needsAck || ackGiven) ? '\u2713 Execute split' : 'Execute split';
+
+    }
+
+  }
+
+  async function executeSplit() {
+
+    if (!selectedEntry || !nonBillableCategoryId) return;
+
+    const reported = parseFloat(document.getElementById('split-report').value);
+
+    const originalHours = selectedEntry.hours;
+
+    const overflow = parseFloat((originalHours - reported).toFixed(2));
+
+    const userId = selectedEntry.userId;
+
+    const userName = contactMap[userId] || userId;
+
+    const taskName = trunc(taskMap[selectedEntry.taskId] || selectedEntry.taskId, 40);
+
+    document.getElementById('execute-btn').disabled = true;
+
+    document.getElementById('execute-btn').textContent = 'Executing...';
+
+    document.getElementById('split-result').textContent = '';
+
+    setStatus('Retrieving user token...', 'loading');
+
+    let userToken;
+
+    try {
+
+      const contactRes = await apiFetch(`/contacts/${userId}?fields=%5BcustomFields%5D`);
+
+      const contact = contactRes.data && contactRes.data[0];
+
+      const tokenField = (contact && contact.customFields || []).find(f => f.id === WRIKE_TOKEN_FIELD_ID);
+
+      userToken = tokenField && tokenField.value;
+
+    } catch(e) {
+
+      setStatus(`Could not retrieve token for ${userName} \u2014 no changes made`, 'error');
+
+      document.getElementById('execute-btn').disabled = false;
+
+      document.getElementById('execute-btn').textContent = '\u2713 Execute split';
+
+      return;
+
+    }
+
+    if (!userToken) {
+
+      setStatus(`No token found for ${userName} \u2014 no changes made. Add WrikeAPITokenForClaude to their Wrike profile.`, 'error');
+
+      document.getElementById('execute-btn').disabled = false;
+
+      document.getElementById('execute-btn').textContent = '\u2713 Execute split';
+
+      return;
+
+    }
+
+    setStatus(`Reducing original entry to ${reported.toFixed(2)} hrs...`, 'loading');
+
+    try {
+
+      await apiFetch(`/timelogs/${selectedEntry.id}`, {
+
+        method: 'PUT',
+
+        body: JSON.stringify({ hours: reported })
+
+      });
+
+    } catch(e) {
+
+      setStatus(`Failed to update original entry \u2014 no changes were made. Error: ${e.message}`, 'error');
+
+      document.getElementById('execute-btn').disabled = false;
+
+      document.getElementById('execute-btn').textContent = '\u2713 Execute split';
+
+      return;
+
+    }
+
+    setStatus(`Creating ${overflow.toFixed(2)} hr internal entry...`, 'loading');
+
+    const trackedDate = selectedEntry.trackedDate
+
+      ? selectedEntry.trackedDate.split('T')[0]
+
+      : new Date().toISOString().split('T')[0];
+
+    try {
+
+      const postRes = await fetch(`${BASE}/tasks/${selectedEntry.taskId}/timelogs`, {
+
+        method: 'POST',
+
+        headers: { 'Authorization': 'Bearer ' + userToken, 'Content-Type': 'application/json' },
+
+        body: JSON.stringify({
+
+          hours: overflow,
+
+          trackedDate: trackedDate,
+
+          categoryId: nonBillableCategoryId,
+
+          comment: `[Internal] Split from timelog \u2014 date: ${trackedDate}, original: ${originalHours.toFixed(2)} hrs, reported: ${reported.toFixed(2)} hrs`
+
+        })
+
+      });
+
+      const postData = await postRes.json();
+
+      if (!postRes.ok) throw new Error(postData.errorDescription || postData.error || JSON.stringify(postData));
+
+    } catch(e) {
+
+      setStatus(`\u26a0 PARTIAL \u2014 Original entry reduced to ${reported.toFixed(2)} hrs but internal entry was NOT created. Manually add ${overflow.toFixed(2)} hrs tagged "${NON_BILLABLE_NAME}" to "${taskName}". Error: ${e.message}`, 'error');
+
+      document.getElementById('execute-btn').disabled = false;
+
+      document.getElementById('execute-btn').textContent = 'Execute split';
+
+      await refreshEntries();
+
+      return;
+
+    }
+
+    setStatus(`Split complete \u2014 ${reported.toFixed(2)} hrs client-visible \u00b7 ${overflow.toFixed(2)} hrs tagged "${NON_BILLABLE_NAME}"`, 'success');
+
+    document.getElementById('split-result').textContent = '\u2713 Done';
+
+    document.getElementById('execute-btn').textContent = 'Execute split';
+
+    document.getElementById('pane-split').style.display = 'none';
+
+    selectedEntry = null;
+
+    await refreshEntries();
+
+  }
+
+  async function refreshEntries() {
+
+    const ds = document.getElementById('date-start').value;
+
+    const de = document.getElementById('date-end').value;
+
+    try {
+
+      const trackedDate = encodeURIComponent(JSON.stringify({ start: ds, end: de }));
+
+      const allResults = [];
+
+      for (const project of loadedProjects) {
+
+        const tr = await apiFetch(`/folders/${project.id}/timelogs?descendants=true&fields=%5BlockStatus%5D&trackedDate=${trackedDate}`);
+
+        if (tr.data && tr.data.length > 0) allResults.push(...tr.data);
+
+      }
+
+      allEntries = dedupeById(allResults);
+
+      const taskIds = [...new Set(allEntries.map(e => e.taskId))];
+
+      const userIds = [...new Set(allEntries.map(e => e.userId))];
+
+      for (const ch of chunk(taskIds, 100)) {
+
+        const r = await apiFetch(`/tasks/${ch.join(',')}`);
+
+        r.data.forEach(t => { taskMap[t.id] = t.title; });
+
+      }
+
+      for (const ch of chunk(userIds, 100)) {
+
+        const r = await apiFetch(`/contacts/${ch.join(',')}`);
+
+        r.data.forEach(u => { contactMap[u.id] = u.firstName + ' ' + u.lastName; });
+
+      }
+
+      populateFilters(allEntries);
+
+      applyFilters();
+
+      showLockBar();
+
+    } catch(e) {
+
+      setStatus('Error refreshing entries: ' + e.message, 'error');
+
+    }
+
+  }
+
+  function dedupeById(entries) {
+
+    const seen = new Set();
+
+    return entries.filter(e => {
+
+      if (seen.has(e.id)) return false;
+
+      seen.add(e.id);
+
+      return true;
+
+    });
+
+  }
+
+  function getCheckedIds() {
+
+    return [...document.querySelectorAll('.entry-checkbox:checked')].map(cb => cb.dataset.id);
+
+  }
+
+  function toggleSelectAll() {
+
+    const checked = document.getElementById('select-all').checked;
+
+    document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = checked);
+
+    updateMassSplitBar();
+
+  }
+
+  function onCheckboxChange() {
+
+    const all = document.querySelectorAll('.entry-checkbox');
+
+    const checked = document.querySelectorAll('.entry-checkbox:checked');
+
+    document.getElementById('select-all').indeterminate = checked.length > 0 && checked.length < all.length;
+
+    document.getElementById('select-all').checked = checked.length === all.length && all.length > 0;
+
+    updateMassSplitBar();
+
+  }
+
+  function updateMassSplitBar() {
+
+    const ids = getCheckedIds();
+
+    const bar = document.getElementById('mass-split-bar');
+
+    const countEl = document.getElementById('mass-selected-count');
+
+    bar.style.display = ids.length > 0 ? 'block' : 'none';
+
+    countEl.textContent = `${ids.length} entr${ids.length === 1 ? 'y' : 'ies'} selected`;
+
+    document.getElementById('mass-split-progress').style.display = 'none';
+
+  }
+
+  function onMassSplitInput(mode) {
+
+    if (mode === 'hours') document.getElementById('mass-split-pct').value = '';
+
+    else document.getElementById('mass-split-hours').value = '';
+
+  }
+
+  function clearSelection() {
+
+    document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
+
+    document.getElementById('select-all').checked = false;
+
+    document.getElementById('select-all').indeterminate = false;
+
+    updateMassSplitBar();
+
+  }
+
+  async function executeMassSplit() {
+
+    const ids = getCheckedIds();
+
+    if (ids.length === 0) return;
+
+    const pct = parseFloat(document.getElementById('mass-split-pct').value);
+
+    const fixedHours = parseFloat(document.getElementById('mass-split-hours').value);
+
+    const usePercent = !isNaN(pct) && pct > 0;
+
+    const useFixed = !isNaN(fixedHours) && fixedHours > 0;
+
+    if (!usePercent && !useFixed) {
+
+      setStatus('Select a split percentage or enter hours before running mass split', 'error');
+
+      return;
+
+    }
+
+    const btn = document.getElementById('mass-execute-btn');
+
+    btn.disabled = true;
+
+    const progressDiv = document.getElementById('mass-split-progress');
+
+    progressDiv.style.display = 'block';
+
+    progressDiv.innerHTML = `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">Processing ${ids.length} entries...</div>`;
+
+    let passed = 0, failed = 0, partial = 0;
+
+    const results = [];
+
+    for (const id of ids) {
+
+      const entry = allEntries.find(e => e.id === id);
+
+      if (!entry) continue;
+
+      const total = entry.hours;
+
+      const reported = usePercent
+
+        ? parseFloat((total * pct / 100).toFixed(2))
+
+        : Math.min(fixedHours, total - 0.01);
+
+      const overflow = parseFloat((total - reported).toFixed(2));
+
+      const user = contactMap[entry.userId] || entry.userId;
+
+      const taskName = trunc(taskMap[entry.taskId] || entry.taskId, 30);
+
+      const trackedDate = entry.trackedDate ? entry.trackedDate.split('T')[0] : new Date().toISOString().split('T')[0];
+
+      if (overflow <= 0 || reported <= 0) {
+
+        results.push({ status: 'skip', label: `${user} \u00b7 ${taskName} \u00b7 ${total.toFixed(2)} hrs`, msg: 'Skipped \u2014 split produces zero or negative overflow' });
+
+        failed++;
+
+        continue;
+
+      }
+
+      let userToken;
+
+      try {
+
+        const contactRes = await apiFetch(`/contacts/${entry.userId}?fields=%5BcustomFields%5D`);
+
+        const contact = contactRes.data && contactRes.data[0];
+
+        const tokenField = (contact && contact.customFields || []).find(f => f.id === WRIKE_TOKEN_FIELD_ID);
+
+        userToken = tokenField && tokenField.value;
+
+      } catch(e) { userToken = null; }
+
+      if (!userToken) {
+
+        results.push({ status: 'fail', label: `${user} \u00b7 ${taskName} \u00b7 ${total.toFixed(2)} hrs`, msg: `No token found for ${user}` });
+
+        failed++;
+
+        continue;
+
+      }
+
+      try {
+
+        await apiFetch(`/timelogs/${entry.id}`, {
+
+          method: 'PUT',
+
+          body: JSON.stringify({ hours: reported })
+
+        });
+
+      } catch(e) {
+
+        results.push({ status: 'fail', label: `${user} \u00b7 ${taskName} \u00b7 ${total.toFixed(2)} hrs`, msg: 'Failed to update \u2014 no changes made' });
+
+        failed++;
+
+        continue;
+
+      }
+
+      try {
+
+        const postRes = await fetch(`${BASE}/tasks/${entry.taskId}/timelogs`, {
+
+          method: 'POST',
+
+          headers: { 'Authorization': 'Bearer ' + userToken, 'Content-Type': 'application/json' },
+
+          body: JSON.stringify({
+
+            hours: overflow,
+
+            trackedDate: trackedDate,
+
+            categoryId: nonBillableCategoryId,
+
+            comment: `[Internal] Split from timelog \u2014 date: ${trackedDate}, original: ${total.toFixed(2)} hrs, reported: ${reported.toFixed(2)} hrs`
+
+          })
+
+        });
+
+        const postData = await postRes.json();
+
+        if (!postRes.ok) throw new Error(postData.errorDescription || postData.error);
+
+        results.push({ status: 'pass', label: `${user} \u00b7 ${taskName}`, msg: `${reported.toFixed(2)} hrs reported \u00b7 ${overflow.toFixed(2)} hrs internal` });
+
+        passed++;
+
+      } catch(e) {
+
+        results.push({ status: 'partial', label: `${user} \u00b7 ${taskName} \u00b7 ${total.toFixed(2)} hrs`, msg: `\u26a0 Original reduced to ${reported.toFixed(2)} hrs but internal entry NOT created. Manually add ${overflow.toFixed(2)} hrs.` });
+
+        partial++;
+
+      }
+
+      const color = { pass: 'var(--success-text)', fail: 'var(--danger-text)', partial: 'var(--warning-text)', skip: 'var(--text-muted)' };
+
+      const icon = { pass: '\u2713', fail: '\u2717', partial: '\u26a0', skip: '\u2014' };
+
+      progressDiv.innerHTML = `
+
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">
+
+          Processing ${ids.length} entries \u2014 ${passed} done, ${failed} failed${partial > 0 ? ', '+partial+' partial' : ''}
+
+        </div>` +
+
+        results.map(r => `
+
+          <div style="display:flex;gap:8px;font-size:12px;padding:3px 0;border-bottom:0.5px solid var(--border);">
+
+            <span style="font-weight:600;color:${color[r.status]};min-width:14px;font-family:var(--mono);">${icon[r.status]}</span>
+
+            <span style="color:var(--text);min-width:200px;">${r.label}</span>
+
+            <span style="color:var(--text-muted);">${r.msg}</span>
+
+          </div>`).join('');
+
+    }
+
+    const summary = `Mass split complete \u2014 ${passed} succeeded${partial > 0 ? ', '+partial+' partial' : ''}${failed > 0 ? ', '+failed+' failed' : ''}`;
+
+    setStatus(summary, passed > 0 && partial === 0 && failed === 0 ? 'success' : 'error');
+
+    btn.disabled = false;
+
+    clearSelection();
+
+    await refreshEntries();
+
+  }
+
+  let lockPeriodProjects = [];
+
+  function showLockBar() {
+
+    const ds = document.getElementById('date-start').value;
+
+    const de = document.getElementById('date-end').value;
+
+    if (!ds || !de || lockPeriodProjects.length === 0) return;
+
+    const lockedCount = allEntries.filter(e => e.lockStatus === 'Locked').length;
+
+    const totalCount = allEntries.length;
+
+    const bar = document.getElementById('lock-bar');
+
+    bar.style.display = 'block';
+
+    const status = lockedCount === 0
+
+      ? `${totalCount} entries \u00b7 period is unlocked`
+
+      : lockedCount === totalCount
+
+        ? `${totalCount} entries \u00b7 &#128274; period is locked`
+
+        : `${lockedCount} of ${totalCount} entries locked`;
+
+    document.getElementById('lock-period-status').innerHTML =
+
+      `<strong>${ds}</strong> \u2192 <strong>${de}</strong> &nbsp;\u00b7&nbsp; ${status}`;
+
+  }
+
+  async function lockPeriod() {
+
+    const ds = document.getElementById('date-start').value;
+
+    const de = document.getElementById('date-end').value;
+
+    if (!ds || !de || lockPeriodProjects.length === 0) return;
+
+    const btn = document.getElementById('lock-btn');
+
+    btn.disabled = true;
+
+    setStatus('Locking period...', 'loading');
+
+    let succeeded = 0, failed = 0;
+
+    for (const project of lockPeriodProjects) {
+
+      try {
+
+        await apiFetch(`/folders/${project.id}/timelog_lock_periods`, {
+
+          method: 'POST',
+
+          body: JSON.stringify({ period: { start: ds, end: de } })
+
+        });
+
+        succeeded++;
+
+      } catch(e) {
+
+        failed++;
+
+      }
+
+    }
+
+    if (failed === 0) {
+
+      setStatus(`Period locked \u2014 ${ds} to ${de} is now read-only for all team members`, 'success');
+
+    } else {
+
+      setStatus(`Lock partially applied \u2014 ${succeeded} projects locked, ${failed} failed`, 'error');
+
+    }
+
+    btn.disabled = false;
+
+    await refreshEntries();
+
+  }
+
+  async function unlockPeriod() {
+
+    const ds = document.getElementById('date-start').value;
+
+    const de = document.getElementById('date-end').value;
+
+    if (!ds || !de || lockPeriodProjects.length === 0) return;
+
+    const btn = document.getElementById('unlock-btn');
+
+    btn.disabled = true;
+
+    setStatus('Unlocking period...', 'loading');
+
+    let succeeded = 0, failed = 0;
+
+    for (const project of lockPeriodProjects) {
+
+      try {
+
+        const lockRes = await apiFetch(`/folders/${project.id}/timelog_lock_periods?period=${encodeURIComponent(JSON.stringify({ start: ds, end: de }))}`);
+
+        const locks = lockRes.data || [];
+
+        for (const lock of locks) {
+
+          await apiFetch(`/folders/${project.id}/timelog_lock_periods`, {
+
+            method: 'DELETE',
+
+            body: JSON.stringify({ period: { start: lock.start, end: lock.end } })
+
+          });
+
+        }
+
+        succeeded++;
+
+      } catch(e) {
+
+        failed++;
+
+      }
+
+    }
+
+    if (failed === 0) {
+
+      setStatus(`Period unlocked \u2014 ${ds} to ${de} entries are now editable`, 'success');
+
+    } else {
+
+      setStatus(`Unlock partially applied \u2014 ${succeeded} projects unlocked, ${failed} failed`, 'error');
+
+    }
+
+    btn.disabled = false;
+
+    await refreshEntries();
+
+  }
+
+  function fmt(cmd, val) {
+
+    document.getElementById('wysiwyg-editor').focus();
+
+    document.execCommand(cmd, false, val || null);
+
+  }
+
+  function insertLink() {
+
+    const url = prompt('Enter URL:', 'https://');
+
+    if (url) {
+
+      document.getElementById('wysiwyg-editor').focus();
+
+      document.execCommand('createLink', false, url);
+
+      const links = document.getElementById('wysiwyg-editor').querySelectorAll('a');
+
+      links.forEach(a => { if (a.href === url) a.target = '_blank'; });
+
+    }
+
+  }
+
+  function cancelSplit() {
+
+    document.getElementById('pane-split').style.display = 'none';
+
+    document.querySelectorAll('#entries-tbody tr[data-id]').forEach(r => r.classList.remove('selected'));
+
+    selectedEntry = null;
+
+  }
+
+  function switchTab(tab) {
+
+    const isManager = tab === 'manager';
+
+    const isReport = tab === 'report';
+
+    const isCsm = tab === 'csm';
+
+    const isStaffing = tab === 'staffing';
+
+    document.getElementById('tab-btn-manager').className = 'tab-btn' + (isManager ? ' active' : '');
+
+    document.getElementById('tab-btn-report').className = 'tab-btn' + (isReport ? ' active' : '');
+
+    document.getElementById('tab-btn-csm').className = 'tab-btn' + (isCsm ? ' active' : '');
+
+    document.getElementById('tab-btn-staffing').className = 'tab-btn' + (isStaffing ? ' active' : '');
+
+    document.getElementById('tab-manager').style.display = isManager ? 'block' : 'none';
+
+    document.getElementById('tab-report').style.display = isReport ? 'block' : 'none';
+
+    document.getElementById('tab-csm').style.display = isCsm ? 'block' : 'none';
+
+    document.getElementById('tab-staffing').style.display = isStaffing ? 'block' : 'none';
+
+  }
+
+  const TOTAL_HOURS_FIELD_ID = 'IEAGNDCVJUALK7XD';
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function setReportStatus(msg, type='') {
+
+    const el = document.getElementById('report-status');
+
+    el.className = 'status-bar' + (type ? ' '+type : '');
+
+    const pulse = type === 'loading' ? ' pulse' : '';
+
+    el.innerHTML = `<div class="dot${pulse}"></div>${msg}`;
+
+  }
+
+  function parseDuration(val) {
+
+    if (!val && val !== 0) return null;
+
+    if (typeof val === 'string' && val.includes(':')) {
+
+      const parts = val.split(':');
+
+      const hours = parseFloat(parts[0]) || 0;
+
+      const mins = parseFloat(parts[1]) || 0;
+
+      return hours + (mins / 60);
+
+    }
+
+    const num = parseFloat(val);
+
+    return isNaN(num) ? null : num;
+
+  }
+
+  function hoursFromMins(hrs) { return hrs; }
+
+  const WRIKE_CUTOVER = { year: 2026, month: 5 };
+
+  let reportOverrides = {};
+
+  let lastReportData = null;
+
+  let lastReportContext = null;
+
+  function onOverrideInput(key, val) {
+
+    const parsed = parseFloat(val);
+
+    reportOverrides[key] = isNaN(parsed) ? 0 : parsed;
+
+    recalcReport();
+
+  }
+
+  function formatDecimalHrs(hrs) {
+
+    if (hrs === null || hrs === undefined) return '\u2014';
+
+    return parseFloat(hrs.toFixed(2)) + ' hrs';
+
+  }
+
+  function recalcReport() {
+
+    if (!lastReportData) return;
+
+    const d = lastReportData;
+
+    const overrideTotal = Object.values(reportOverrides).reduce((s, v) => s + v, 0);
+
+    const wrikeTotal = d.totalUsedHrs;
+
+    const combinedUsed = wrikeTotal + overrideTotal;
+
+    const remainingHrs = d.totalRetainerHrs !== null ? d.totalRetainerHrs - combinedUsed : null;
+
+    const pctUsed = d.totalRetainerHrs ? Math.round((combinedUsed / d.totalRetainerHrs) * 100) : null;
+
+    const pctRemaining = d.totalRetainerHrs && remainingHrs !== null ? Math.round((Math.max(0, remainingHrs) / d.totalRetainerHrs) * 100) : null;
+
+    let sentences = `<p><strong>${d.retainerName}</strong> &nbsp;\u00b7&nbsp; ${d.sowVal ? 'SOW ' + d.sowVal : d.projectName}</p><br>`;
+
+    if (d.totalRetainerHrs !== null) {
+
+      sentences += `<p>This retainer covers <strong>${formatDecimalHrs(d.totalRetainerHrs)}</strong> total`;
+
+      if (d.retainerMonths) sentences += ` over <strong>${d.retainerMonths} months</strong>`;
+
+      if (d.monthlyAlloc) sentences += `, with a monthly allocation of approximately <strong>${formatDecimalHrs(d.monthlyAlloc)}</strong>`;
+
+      sentences += '.</p>';
+
+      sentences += `<p>As of <strong>${d.periodLabel}</strong>, <strong>${formatDecimalHrs(combinedUsed)}</strong> have been used${pctUsed !== null ? ' (<strong>'+pctUsed+'%</strong> of the retainer)' : ''}, leaving <strong>${formatDecimalHrs(Math.max(0, remainingHrs))}</strong> remaining${pctRemaining !== null ? ' (<strong>'+pctRemaining+'%</strong>)' : ''}.</p>`;
+
+    } else {
+
+      sentences += '<p>No total hours found on this retainer. Add the <strong>Total Hours</strong> custom field to the project to see allocation data.</p>';
+
+    }
+
+    sentences += `<p>During <strong>${d.periodLabel}</strong>, a total of <strong>${formatDecimalHrs(d.periodHrs)}</strong> of time was logged across this retainer.</p>`;
+
+    if (overrideTotal > 0) {
+
+      sentences += `<p style="color:var(--warning-text);font-size:13px;">\u26a0 Includes <strong>${formatDecimalHrs(overrideTotal)}</strong> of manually entered legacy hours from prior to June 2026.</p>`;
+
+    }
+
+    document.getElementById('report-smart-sentences').innerHTML = sentences;
+
+    document.getElementById('report-summary-cards').innerHTML = `
+
+      <div class="report-summary-cards">
+
+        <div class="scard"><div class="slabel">Retainer total</div><div class="sval">${d.totalRetainerHrs !== null ? formatDecimalHrs(d.totalRetainerHrs) : '\u2014'}</div></div>
+
+        <div class="scard"><div class="slabel">Hours used</div><div class="sval">${formatDecimalHrs(combinedUsed)}</div></div>
+
+        <div class="scard" style="border:0.5px solid var(--success-text);"><div class="slabel" style="color:var(--success-text);">Remaining</div><div class="sval">${remainingHrs !== null ? formatDecimalHrs(Math.max(0, remainingHrs)) : '\u2014'}</div></div>
+
+        <div class="scard"><div class="slabel">${d.periodLabel}</div><div class="sval">${formatDecimalHrs(d.periodHrs)}</div></div>
+
+      </div>`;
+
+  }
+
+  async function generateReport() {
+
+    const sowVal = document.getElementById('sow-search').value.trim();
+
+    const projectName = document.getElementById('project-search').value.trim();
+
+    const repStart = document.getElementById('date-start').value;
+
+    const repEnd = document.getElementById('date-end').value;
+
+    if (!sowVal && !projectName) { setReportStatus('Enter a SOW number or project name in the search bar above', 'error'); return; }
+
+    if (!repStart || !repEnd) { setReportStatus('Select a date range in the search bar above', 'error'); return; }
+
+    document.getElementById('report-output').style.display = 'none';
+
+    setReportStatus(`Loading retainer data for ${sowVal ? 'SOW ' + sowVal : projectName}...`, 'loading');
+
+    try {
+
+      let projects = [];
+
+      if (sowVal) {
+
+        let allFolders = [];
+
+        let nextPageToken = null;
+
+        do {
+
+          const pagePart = nextPageToken ? `&nextPageToken=${nextPageToken}` : '';
+
+          const sr = await apiFetch(`/spaces/IEAGNDCVI5PUIXRQ/folders?project=true&fields=%5B%22customFields%22%5D&pageSize=200${pagePart}`);
+
+          allFolders = allFolders.concat(sr.data || []);
+
+          nextPageToken = sr.nextPageToken || null;
+
+        } while (nextPageToken);
+
+        projects = allFolders.filter(f => {
+
+          return (f.customFields || []).some(cf => cf.id === SOW_FIELD_ID && String(cf.value) === String(sowVal));
+
+        });
+
+      } else {
+
+        const sr = await apiFetch(`/folders?title=${encodeURIComponent(projectName)}&project=true`);
+
+        projects = sr.data || [];
+
+      }
+
+      if (projects.length === 0) {
+
+        setReportStatus(`No projects found for "${sowVal || projectName}"`, 'error');
+
+        return;
+
+      }
+
+      const projectIds = projects.map(p => p.id);
+
+      let projectDetails = [];
+
+      if (sowVal) {
+
+        const detailRes = await apiFetch(`/folders/${projectIds.join(',')}`);
+
+        const detailData = detailRes.data || [];
+
+        projectDetails = detailData.map(d => {
+
+          const orig = projects.find(p => p.id === d.id);
+
+          return { ...d, customFields: orig?.customFields || [] };
+
+        });
+
+      } else {
+
+        const detailRes = await apiFetch(`/folders/${projectIds.join(',')}`);
+
+        projectDetails = detailRes.data || [];
+
+        try {
+
+          const cfRes = await apiFetch(`/folders/${projectIds.join(',')}?fields=%5B%22customFields%22%5D`);
+
+          cfRes.data?.forEach(d => {
+
+            const p = projectDetails.find(x => x.id === d.id);
+
+            if (p) p.customFields = d.customFields || [];
+
+          });
+
+        } catch(e) {}
+
+      }
+
+      let retainerName = projectDetails[0]?.title || `SOW ${sowVal}`;
+
+      let totalHoursMins = null;
+
+      let retainerStart = null;
+
+      let retainerEnd = null;
+
+      for (const p of projectDetails) {
+
+        if (p.project?.startDate) {
+
+          if (!retainerStart || p.project.startDate < retainerStart) retainerStart = p.project.startDate;
+
+        }
+
+        if (p.project?.endDate) {
+
+          if (!retainerEnd || p.project.endDate > retainerEnd) retainerEnd = p.project.endDate;
+
+        }
+
+      }
+
+      for (const p of projectDetails) {
+
+        const cf = (p.customFields || []).find(f => f.id === TOTAL_HOURS_FIELD_ID);
+
+        if (cf && cf.value) {
+
+          const hasDate = p.project?.startDate && p.project?.endDate;
+
+          if (hasDate || totalHoursMins === null) {
+
+            totalHoursMins = parseDuration(cf.value);
+
+            retainerName = p.title;
+
+          }
+
+        }
+
+      }
+
+      const reportTaskMap = {};
+
+      const projectTaskMap = {};
+
+      const seenTaskIds = new Set();
+
+      for (const p of projectDetails) {
+
+        const tasksRes = await apiFetch(`/folders/${p.id}/tasks?descendants=true`);
+
+        projectTaskMap[p.id] = [];
+
+        for (const t of (tasksRes.data || [])) {
+
+          if (!seenTaskIds.has(t.id)) {
+
+            seenTaskIds.add(t.id);
+
+            reportTaskMap[t.id] = { title: t.title, projectId: p.id, projectTitle: p.title };
+
+          }
+
+          if (!projectTaskMap[p.id].includes(t.id)) {
+
+            projectTaskMap[p.id].push(t.id);
+
+          }
+
+        }
+
+      }
+
+      if (retainerStart && repEnd < retainerStart) {
+
+        setReportStatus(`The selected date range ends before this retainer started (${retainerStart}). Please select a date range within the retainer period.`, 'error');
+
+        return;
+
+      }
+
+      if (retainerEnd && repStart > retainerEnd) {
+
+        setReportStatus(`The selected date range starts after this retainer ended (${retainerEnd}). Please select a date range within the retainer period.`, 'error');
+
+        return;
+
+      }
+
+      const fetchStart = retainerStart && repStart < retainerStart ? retainerStart : repStart;
+
+      const fetchEnd = retainerEnd && repEnd > retainerEnd ? retainerEnd : repEnd;
+
+      const retainerTrackedDate = encodeURIComponent(JSON.stringify({
+
+        start: retainerStart || fetchStart,
+
+        end: fetchEnd
+
+      }));
+
+      let allTimelogs = [];
+
+      for (const p of projectDetails) {
+
+        const tl = await apiFetch(`/folders/${p.id}/timelogs?descendants=true&fields=%5BlockStatus%5D&trackedDate=${retainerTrackedDate}`);
+
+        allTimelogs = allTimelogs.concat(tl.data || []);
+
+      }
+
+      allTimelogs = dedupeById(allTimelogs);
+
+      const clientTimelogs = allTimelogs.filter(e => e.categoryId !== nonBillableCategoryId);
+
+      const startDate = new Date((retainerStart || repStart) + 'T12:00:00');
+
+      const endDate = new Date(fetchEnd + 'T12:00:00');
+
+      const months = [];
+
+      let cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+
+      const reportEndMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+
+      while (cursor <= reportEndMonth) {
+
+        months.push({ year: cursor.getFullYear(), month: cursor.getMonth() });
+
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+
+      }
+
+      const monthlyHours = months.map(({ year, month }) => {
+
+        const hrs = clientTimelogs
+
+          .filter(e => {
+
+            if (!e.trackedDate) return false;
+
+            const d = new Date(e.trackedDate + 'T12:00:00');
+
+            return d.getFullYear() === year && d.getMonth() === month;
+
+          })
+
+          .reduce((s, e) => s + e.hours, 0);
+
+        return { year, month, hrs };
+
+      });
+
+      const periodTimelogs = clientTimelogs.filter(e => {
+
+        if (!e.trackedDate) return false;
+
+        return e.trackedDate >= repStart && e.trackedDate <= repEnd;
+
+      });
+
+      const taskHours = {};
+
+      for (const e of periodTimelogs) {
+
+        taskHours[e.taskId] = (taskHours[e.taskId] || 0) + e.hours;
+
+      }
+
+      if (periodTimelogs.length === 0) {
+
+        setReportStatus('No client-visible time entries found for the selected period \u2014 showing retainer summary only', 'error');
+
+      }
+
+      const totalRetainerHrs = totalHoursMins ? hoursFromMins(totalHoursMins) : null;
+
+      const CUTOVER_DATE = '2026-06-01';
+
+      const wrikeTimelogs = clientTimelogs.filter(e => e.trackedDate && e.trackedDate >= CUTOVER_DATE);
+
+      const totalUsedHrs = wrikeTimelogs.reduce((s, e) => s + e.hours, 0);
+
+      const remainingHrs = totalRetainerHrs !== null ? totalRetainerHrs - totalUsedHrs : null;
+
+      const periodHrs = periodTimelogs.reduce((s, e) => s + e.hours, 0);
+
+      const retainerMonths = retainerStart && retainerEnd
+
+        ? (() => {
+
+            const s = new Date(retainerStart + 'T12:00:00');
+
+            const en = new Date(retainerEnd + 'T12:00:00');
+
+            return (en.getFullYear() - s.getFullYear()) * 12 + (en.getMonth() - s.getMonth()) + 1;
+
+          })() : null;
+
+      const monthlyAlloc = totalRetainerHrs && retainerMonths ? totalRetainerHrs / retainerMonths : null;
+
+      const repStartDate = new Date(repStart + 'T12:00:00');
+
+      const repEndDate = new Date(repEnd + 'T12:00:00');
+
+      const periodLabel = repStartDate.getMonth() === repEndDate.getMonth() && repStartDate.getFullYear() === repEndDate.getFullYear()
+
+        ? `${MONTHS[repStartDate.getMonth()]} ${repStartDate.getFullYear()}`
+
+        : `${MONTHS[repStartDate.getMonth()]} ${repStartDate.getFullYear()} \u2013 ${MONTHS[repEndDate.getMonth()]} ${repEndDate.getFullYear()}`;
+
+      renderReport({
+
+        sowVal, projectName, retainerName, periodLabel, repStart, repEnd: fetchEnd,
+
+        totalRetainerHrs, totalUsedHrs, remainingHrs,
+
+        periodHrs, monthlyAlloc, retainerMonths, monthlyHours,
+
+        taskHours, reportTaskMap, projectDetails, projectTaskMap,
+
+        retainerStart, retainerEnd
+
+      });
+
+      lastReportContext = { projectDetails, retainerStart, retainerEnd, fetchEnd, repStart,
+
+        totalRetainerHrs, retainerMonths, monthlyAlloc,
+
+        periodLabel, sowVal, projectName, retainerName, reportTaskMap, projectTaskMap };
+
+      document.getElementById('refresh-wrike-btn').style.display = 'inline-block';
+
+      document.getElementById('refresh-hint').textContent = 'Re-fetches Wrike timelogs without clearing legacy hours';
+
+      document.getElementById('email-composer').style.display = 'block';
+
+      setReportStatus(`Report generated for ${sowVal ? 'SOW ' + sowVal : projectName} \u2014 ${periodLabel}`, 'success');
+
+    } catch(e) {
+
+      setReportStatus('Error generating report: ' + e.message, 'error');
+
+    }
+
+  }
+
+  function renderReport(d) {
+
+    const out = document.getElementById('report-output');
+
+    out.style.display = 'block';
+
+    lastReportData = d;
+
+    reportOverrides = {};
+
+    const repStartDate = new Date(d.repStart + 'T12:00:00');
+
+    const showAlloc = d.monthlyAlloc !== null && d.monthlyAlloc !== undefined;
+
+    const allocHeader = showAlloc ? '<th class="num">Allocated</th>' : '';
+
+    let monthRows = d.monthlyHours.map(({ year, month, hrs }) => {
+
+      const isCurrent = year === repStartDate.getFullYear() && month === repStartDate.getMonth();
+
+      const isPreCutover = year < WRIKE_CUTOVER.year || (year === WRIKE_CUTOVER.year && month < WRIKE_CUTOVER.month);
+
+      const allocCell = showAlloc ? `<td class="num">${formatDecimalHrs(d.monthlyAlloc)}</td>` : '';
+
+      const key = `${year}-${month}`;
+
+      if (isPreCutover) {
+
+        return `<tr class="${isCurrent ? 'month-current' : ''}" style="background:var(--warning-bg);">
+
+          <td>${MONTHS[month]} ${year}<span style="font-size:10px;color:var(--warning-text);font-family:var(--mono);margin-left:6px;">legacy</span></td>
+
+          ${allocCell}
+
+          <td class="num">
+
+            <input type="number" min="0" step="0.01" placeholder="0.00"
+
+              style="width:80px;text-align:right;font-family:var(--mono);font-size:13px;font-weight:500;
+
+                     padding:3px 6px;border:0.5px solid var(--warning-text);border-radius:4px;
+
+                     background:var(--bg);color:var(--text);"
+
+              data-key="${key}"
+
+              oninput="onOverrideInput('${key}', this.value)"
+
+              title="Enter hours from legacy system for ${MONTHS[month]} ${year}" />
+
+          </td>
+
+        </tr>`;
+
+      }
+
+      return `<tr class="${isCurrent ? 'month-current' : ''}">
+
+        <td>${MONTHS[month]} ${year}</td>
+
+        ${allocCell}
+
+        <td class="num" id="month-hrs-${key}">${formatDecimalHrs(hrs)}</td>
+
+      </tr>`;
+
+    }).join('');
+
+    const hasPreCutover = d.monthlyHours.some(m => m.year < WRIKE_CUTOVER.year || (m.year === WRIKE_CUTOVER.year && m.month < WRIKE_CUTOVER.month));
+
+    const monthTable = `
+
+      <div class="report-section">
+
+        <h3>Monthly hours \u2014 client-visible</h3>
+
+        ${hasPreCutover ? '<p style="font-size:12px;color:var(--warning-text);margin-bottom:8px;padding:6px 10px;background:var(--warning-bg);border-radius:var(--radius);border:0.5px solid var(--warning-text);">\u26a0 Months highlighted in amber predate our Wrike cutover (June 2026). Enter hours from the legacy system to include them in totals.</p>' : ''}
+
+        <div class="table-wrap"><table class="report-table">
+
+          <thead><tr><th>Month</th>${allocHeader}<th class="num">Hours used</th></tr></thead>
+
+          <tbody id="report-month-tbody">${monthRows}</tbody>
+
+        </table></div>
+
+      </div>`;
+
+    let taskRows = '';
+
+    for (const proj of d.projectDetails) {
+
+      const projTaskIds = d.projectTaskMap[proj.id] || [];
+
+      const projEntries = projTaskIds.filter(tid => d.taskHours[tid]);
+
+      if (projEntries.length === 0) continue;
+
+      const projTotal = projEntries.reduce((s, tid) => s + (d.taskHours[tid] || 0), 0);
+
+      taskRows += `<tr class="sub-project-row"><td colspan="2" style="padding-left:10px;">&#8627; ${trunc(proj.title, 70)}</td></tr>`;
+
+      for (const tid of projTaskIds) {
+
+        const hrs = d.taskHours[tid];
+
+        if (!hrs) continue;
+
+        const taskTitle = d.reportTaskMap[tid]?.title || tid;
+
+        taskRows += `<tr class="task-row"><td>${trunc(taskTitle, 65)}</td><td class="num">${formatDecimalHrs(hrs)}</td></tr>`;
+
+      }
+
+      taskRows += `<tr style="background:var(--bg-secondary);"><td style="font-size:12px;color:var(--text-muted);padding-left:10px;">Subtotal</td><td class="num" style="font-weight:600;">${formatDecimalHrs(projTotal)}</td></tr>`;
+
+    }
+
+    const periodTotal = Object.values(d.taskHours).reduce((s, h) => s + h, 0);
+
+    if (taskRows) {
+
+      taskRows += `<tr class="total-row"><td>Total \u2014 ${d.periodLabel}</td><td class="num">${formatDecimalHrs(periodTotal)}</td></tr>`;
+
+    }
+
+    const taskTable = taskRows ? `
+
+      <div class="report-section">
+
+        <h3>Task breakdown \u2014 ${d.periodLabel} (client-visible hours)</h3>
+
+        <div class="table-wrap"><table class="report-table">
+
+          <thead><tr><th>Task</th><th class="num">Hours</th></tr></thead>
+
+          <tbody>${taskRows}</tbody>
+
+        </table></div>
+
+      </div>` : '<p style="font-size:13px;color:var(--text-muted);">No client-visible time entries found for this period.</p>';
+
+    out.innerHTML = `
+
+      <hr style="border:none;border-top:0.5px solid var(--border);margin:1.25rem 0;">
+
+      <div id="report-smart-sentences" class="smart-sentences"></div>
+
+      <div id="report-summary-cards"></div>
+
+      ${monthTable}
+
+      ${taskTable}`;
+
+    recalcReport();
+
+  }
+
+  async function refreshReportData() {
+
+    if (!lastReportContext) return;
+
+    const c = lastReportContext;
+
+    const btn = document.getElementById('refresh-wrike-btn');
+
+    btn.disabled = true;
+
+    setReportStatus('Refreshing Wrike timelog data...', 'loading');
+
+    try {
+
+      const retainerTrackedDate = encodeURIComponent(JSON.stringify({
+
+        start: c.retainerStart || c.repStart,
+
+        end: c.fetchEnd
+
+      }));
+
+      let allTimelogs = [];
+
+      for (const p of c.projectDetails) {
+
+        const tl = await apiFetch(`/folders/${p.id}/timelogs?descendants=true&fields=%5BlockStatus%5D&trackedDate=${retainerTrackedDate}`);
+
+        allTimelogs = allTimelogs.concat(tl.data || []);
+
+      }
+
+      allTimelogs = dedupeById(allTimelogs);
+
+      const clientTimelogs = allTimelogs.filter(e => e.categoryId !== nonBillableCategoryId);
+
+      const startDate = new Date((c.retainerStart || c.repStart) + 'T12:00:00');
+
+      const endDate = new Date(c.fetchEnd + 'T12:00:00');
+
+      const months = [];
+
+      let cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+
+      const reportEndMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+
+      while (cursor <= reportEndMonth) {
+
+        months.push({ year: cursor.getFullYear(), month: cursor.getMonth() });
+
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+
+      }
+
+      const monthlyHours = months.map(({ year, month }) => {
+
+        const hrs = clientTimelogs
+
+          .filter(e => {
+
+            if (!e.trackedDate) return false;
+
+            const d = new Date(e.trackedDate + 'T12:00:00');
+
+            return d.getFullYear() === year && d.getMonth() === month;
+
+          })
+
+          .reduce((s, e) => s + e.hours, 0);
+
+        return { year, month, hrs };
+
+      });
+
+      const periodTimelogs = clientTimelogs.filter(e => {
+
+        if (!e.trackedDate) return false;
+
+        return e.trackedDate >= c.repStart && e.trackedDate <= c.fetchEnd;
+
+      });
+
+      const taskHours = {};
+
+      for (const e of periodTimelogs) {
+
+        taskHours[e.taskId] = (taskHours[e.taskId] || 0) + e.hours;
+
+      }
+
+      const CUTOVER_DATE = '2026-06-01';
+
+      const wrikeTimelogs = clientTimelogs.filter(e => e.trackedDate && e.trackedDate >= CUTOVER_DATE);
+
+      const totalUsedHrs = wrikeTimelogs.reduce((s, e) => s + e.hours, 0);
+
+      const remainingHrs = c.totalRetainerHrs !== null ? c.totalRetainerHrs - totalUsedHrs : null;
+
+      const periodHrs = periodTimelogs.reduce((s, e) => s + e.hours, 0);
+
+      const currentOverrides = { ...reportOverrides };
+
+      lastReportData = {
+
+        ...lastReportData,
+
+        totalUsedHrs, remainingHrs, periodHrs, monthlyHours, taskHours
+
+      };
+
+      monthlyHours.forEach(({ year, month, hrs }) => {
+
+        const key = `${year}-${month}`;
+
+        const cell = document.getElementById(`month-hrs-${key}`);
+
+        if (cell) cell.textContent = formatDecimalHrs(hrs);
+
+      });
+
+      reportOverrides = currentOverrides;
+
+      recalcReport();
+
+      setReportStatus('Wrike data refreshed \u2014 legacy hours preserved', 'success');
+
+    } catch(e) {
+
+      setReportStatus('Error refreshing: ' + e.message, 'error');
+
+    }
+
+    btn.disabled = false;
+
+  }
+
+  function previewEmail() {
+
+    const html = buildEmailHTML();
+
+    if (!html) { setReportStatus('Generate a report first before previewing', 'error'); return; }
+
+    const panel = document.getElementById('email-preview-panel');
+
+    const frame = document.getElementById('email-preview-frame');
+
+    frame.innerHTML = '';
+
+    const iframe = document.createElement('iframe');
+
+    iframe.style.cssText = 'width:100%;height:700px;border:none;display:block;';
+
+    frame.appendChild(iframe);
+
+    iframe.contentDocument.open();
+
+    iframe.contentDocument.write(html);
+
+    iframe.contentDocument.close();
+
+    panel.style.display = 'block';
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  }
+
+  async function copyEmailToClipboard() {
+
+    const html = buildEmailHTML();
+
+    if (!html) { setReportStatus('Generate a report first before copying', 'error'); return; }
+
+    try {
+
+      await navigator.clipboard.write([
+
+        new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }) })
+
+      ]);
+
+      setReportStatus('Email copied \u2014 open Outlook, create a new email, and paste (Ctrl+V)', 'success');
+
+    } catch(e) {
+
+      try {
+
+        await navigator.clipboard.writeText(html);
+
+        setReportStatus('HTML copied to clipboard \u2014 paste into Outlook compose window', 'success');
+
+      } catch(e2) {
+
+        setReportStatus('Copy failed \u2014 try using the Preview button and copy from there', 'error');
+
+      }
+
+    }
+
+  }
+
+  function downloadEml() {
+
+    const html = buildEmailHTML();
+
+    if (!html) { setReportStatus('Generate a report first before downloading', 'error'); return; }
+
+    const d = lastReportData;
+
+    const subject = d ? `Retainer Report - ${d.retainerName} - ${d.periodLabel}` : 'Monthly Retainer Report';
+
+    const boundary = 'boundary_' + Date.now();
+
+    const emlContent = [
+
+      'MIME-Version: 1.0',
+
+      'Content-Type: multipart/alternative; boundary="' + boundary + '"',
+
+      'Subject: ' + subject,
+
+      'X-Unsent: 1',
+
+      '',
+
+      '--' + boundary,
+
+      'Content-Type: text/plain; charset="UTF-8"',
+
+      'Content-Transfer-Encoding: 7bit',
+
+      '',
+
+      'Please view this email in an HTML-capable email client.',
+
+      '',
+
+      '--' + boundary,
+
+      'Content-Type: text/html; charset="UTF-8"',
+
+      'Content-Transfer-Encoding: quoted-printable',
+
+      '',
+
+      htmlToQP(html),
+
+      '',
+
+      '--' + boundary + '--'
+
+    ].join('\r\n');
+
+    const blob = new Blob([emlContent], { type: 'message/rfc822' });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+
+    a.href = url;
+
+    a.download = `retainer-report-${(d?.sowVal || 'report')}-${new Date().toISOString().slice(0,10)}.eml`;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    setReportStatus('Email downloaded \u2014 double-click the .eml file to open in Outlook', 'success');
+
+  }
+
+  function htmlToQP(str) {
+
+    let result = '';
+
+    let lineLen = 0;
+
+    for (let i = 0; i < str.length; i++) {
+
+      const code = str.charCodeAt(i);
+
+      let encoded;
+
+      if (code === 13 && str.charCodeAt(i+1) === 10) {
+
+        result += '\r\n';
+
+        lineLen = 0;
+
+        i++;
+
+        continue;
+
+      } else if (code === 10) {
+
+        result += '\r\n';
+
+        lineLen = 0;
+
+        continue;
+
+      } else if (code === 9 || (code >= 32 && code <= 126 && code !== 61)) {
+
+        encoded = str[i];
+
+      } else {
+
+        encoded = '=' + code.toString(16).toUpperCase().padStart(2, '0');
+
+      }
+
+      if (lineLen + encoded.length > 75) {
+
+        result += '=\r\n';
+
+        lineLen = 0;
+
+      }
+
+      result += encoded;
+
+      lineLen += encoded.length;
+
+    }
+
+    return result;
+
+  }
+
+  const CSM_WRIKE_ID_FIELD = 'IEAGNDCVJUAMSRT5';
+
+  const SOW_FIELD_ID_CSM = 'IEAGNDCVJUAKDCLF';
+
+  let allCSMProjects = [];
+
+  async function loadCSMRecords() { return 0; }
+
+  function setCsmStatus(msg, type='') {
+
+    const el = document.getElementById('csm-status');
+
+    el.className = 'status-bar' + (type ? ' '+type : '');
+
+    const pulse = type === 'loading' ? ' pulse' : '';
+
+    el.innerHTML = `<div class="dot${pulse}"></div>${msg}`;
+
+  }
+
+  function formatDateShort(dateStr) {
+
+    if (!dateStr) return '\u2014';
+
+    try {
+
+      const d = new Date(dateStr + 'T12:00:00');
+
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+
+      const dd = String(d.getDate()).padStart(2,'0');
+
+      const yy = String(d.getFullYear()).slice(-2);
+
+      return `${mm}/${dd}/${yy}`;
+
+    } catch(e) { return dateStr; }
+
+  }
+
+  async function loadCSMProjects() {
+
+    setCsmStatus('Loading CSM records from DataHub...', 'loading');
+
+    document.getElementById('csm-table-wrap').style.display = 'none';
+
+    document.getElementById('csm-count').textContent = '';
+
+    try {
+
+      let allFolders = [];
+
+      let nextPageToken = null;
+
+      let pageCount = 0;
+
+      do {
+
+        const pagePart = nextPageToken ? `&nextPageToken=${encodeURIComponent(nextPageToken)}` : '';
+
+        const res = await apiFetch(`/spaces/IEAGNDCVI5PUIXRQ/folders?project=true&fields=%5B%22customFields%22%5D&pageSize=200${pagePart}`);
+
+        const folders = res.data || [];
+
+        allFolders = allFolders.concat(folders);
+
+        nextPageToken = res.nextPageToken || null;
+
+        pageCount++;
+
+        setCsmStatus(`Fetching projects... ${allFolders.length} loaded (page ${pageCount})`, 'loading');
+
+      } while (nextPageToken);
+
+      const allMapped = allFolders
+
+        .filter(f => {
+
+          if (!f.project) return false;
+
+          const cfs = f.customFields || [];
+
+          return cfs.some(cf => cf.id === SOW_FIELD_ID_CSM && cf.value);
+
+        })
+
+        .map(f => {
+
+          const cfs = f.customFields || [];
+
+          const csmWrikeIdField = cfs.find(cf => cf.id === CSM_WRIKE_ID_FIELD);
+
+          const sowField = cfs.find(cf => cf.id === SOW_FIELD_ID_CSM);
+
+          const csmWrikeId = csmWrikeIdField ? (csmWrikeIdField.value || '').trim() : '';
+
+          const csmName = csmWrikeId ? (contactMap[csmWrikeId] || csmWrikeId) : '';
+
+          return {
+
+            id: f.id, title: f.title || '\u2014', csm: csmName, csmWrikeId,
+
+            sow: sowField ? String(sowField.value || '') : '',
+
+            status: f.project?.status || '\u2014',
+
+            startDate: f.project?.startDate || '',
+
+            endDate: f.project?.endDate || '',
+
+            permalink: f.permalink || '',
+
+            hasDates: !!(f.project?.startDate && f.project?.endDate)
+
+          };
+
+        });
+
+      const sowMap = {};
+
+      allMapped.forEach(p => {
+
+        if (!p.sow) return;
+
+        const existing = sowMap[p.sow];
+
+        if (!existing) {
+
+          sowMap[p.sow] = p;
+
+        } else if (p.hasDates && !existing.hasDates) {
+
+          sowMap[p.sow] = p;
+
+        }
+
+      });
+
+      allCSMProjects = Object.values(sowMap);
+
+      const sel = document.getElementById('csm-filter');
+
+      const current = sel.value;
+
+      const existing = new Set([...sel.options].map(o => o.value).filter(Boolean));
+
+      const projectCsmValues = [...new Set(allCSMProjects.map(p => p.csm).filter(Boolean))];
+
+      let added = false;
+
+      projectCsmValues.forEach(csm => {
+
+        if (!existing.has(csm)) {
+
+          const opt = document.createElement('option');
+
+          opt.value = csm; opt.textContent = csm;
+
+          sel.appendChild(opt);
+
+          added = true;
+
+        }
+
+      });
+
+      if (added) {
+
+        const allOpts = [...sel.options].slice(1).sort((a, b) => a.text.localeCompare(b.text));
+
+        while (sel.options.length > 1) sel.remove(1);
+
+        allOpts.forEach(o => sel.appendChild(o));
+
+      }
+
+      if (current) sel.value = current;
+
+      filterCSMTable();
+
+      setCsmStatus(`Loaded ${allCSMProjects.length} projects across ${pageCount} page${pageCount > 1 ? 's' : ''}`, 'success');
+
+    } catch(e) {
+
+      setCsmStatus('Error loading projects: ' + e.message, 'error');
+
+    }
+
+  }
+
+  function filterCSMTable() {
+
+    const csmVal = document.getElementById('csm-filter').value;
+
+    const nameVal = document.getElementById('csm-name-filter').value.trim().toLowerCase();
+
+    let filtered = allCSMProjects;
+
+    if (csmVal) filtered = filtered.filter(p => p.csm === csmVal);
+
+    if (nameVal) filtered = filtered.filter(p => p.title.toLowerCase().includes(nameVal));
+
+    const countEl = document.getElementById('csm-count');
+
+    countEl.textContent = filtered.length === allCSMProjects.length
+
+      ? `${filtered.length} projects`
+
+      : `${filtered.length} of ${allCSMProjects.length} projects`;
+
+    renderCSMTable(filtered);
+
+  }
+
+  function renderCSMTable(projects) {
+
+    const tbody = document.getElementById('csm-tbody');
+
+    document.getElementById('csm-table-wrap').style.display = 'block';
+
+    if (projects.length === 0) {
+
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px;">No projects match the current filters</td></tr>';
+
+      return;
+
+    }
+
+    const sorted = [...projects].sort((a, b) => {
+
+      const csmCmp = a.csm.localeCompare(b.csm);
+
+      if (csmCmp !== 0) return csmCmp;
+
+      return a.sow.localeCompare(b.sow, undefined, { numeric: true });
+
+    });
+
+    tbody.innerHTML = sorted.map(p => {
+
+      const statusColor = p.status === 'Completed' ? 'var(--success-text)' :
+
+                          p.status === 'Cancelled' ? 'var(--danger-text)' :
+
+                          p.status === 'OnHold' ? 'var(--warning-text)' : 'var(--text)';
+
+      const titleCell = p.permalink
+
+        ? `<a href="${p.permalink}" target="_blank" style="color:var(--text);text-decoration:none;" title="${p.title}">${trunc(p.title, 55)}</a>`
+
+        : trunc(p.title, 55);
+
+      return `<tr>
+
+        <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.csm || '<span style="color:var(--text-muted);">\u2014</span>'}</td>
+
+        <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);font-family:var(--mono);font-size:12px;">${p.sow || '<span style="color:var(--text-muted);">\u2014</span>'}</td>
+
+        <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${titleCell}</td>
+
+        <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);font-size:12px;color:${statusColor};">${p.status}</td>
+
+        <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);font-family:var(--mono);font-size:12px;">${formatDateShort(p.startDate)}</td>
+
+        <td style="padding:8px 12px;border-bottom:0.5px solid var(--border);font-family:var(--mono);font-size:12px;">${formatDateShort(p.endDate)}</td>
+
+      </tr>`;
+
+    }).join('');
+
+  }
+
+  const STAFFING_CLIENT_FIELD   = 'IEAGNDCVJUAMSYEV';
+
+  const STAFFING_SOW_FIELD      = 'IEAGNDCVJUAKDCLF';
+
+  const STAFFING_TASKTYPE_FIELD = 'IEAGNDCVJUAHXOZR';
+
+  const EXCLUDED_STATUSES       = new Set(['Cancelled','Deferred']);
+
+  let staffingData = [];
+
+  function setStaffingStatus(msg, type='') {
+
+    const el = document.getElementById('staffing-status');
+
+    el.className = 'status-bar' + (type ? ' '+type : '');
+
+    const pulse = type === 'loading' ? ' pulse' : '';
+
+    el.innerHTML = `<div class="dot${pulse}"></div>${msg}`;
+
+  }
+
+  async function generateStaffingReport() {
+
+    setStaffingStatus('Loading projects...', 'loading');
+
+    document.getElementById('staffing-output').style.display = 'none';
+
+    document.getElementById('staffing-count').textContent = '';
+
+    document.getElementById('staffing-clear-btn').style.display = 'none';
+
+    try {
+
+      let allFolders = [];
+
+      let nextPageToken = null;
+
+      let pageCount = 0;
+
+      do {
+
+        const pagePart = nextPageToken ? `&nextPageToken=${encodeURIComponent(nextPageToken)}` : '';
+
+        const res = await apiFetch(`/spaces/IEAGNDCVI5PUIXRQ/folders?project=true&fields=%5B%22customFields%22%5D&pageSize=200${pagePart}`);
+
+        allFolders = allFolders.concat(res.data || []);
+
+        nextPageToken = res.nextPageToken || null;
+
+        pageCount++;
+
+        setStaffingStatus(`Loading projects... ${allFolders.length} found`, 'loading');
+
+      } while (nextPageToken);
+
+      const clientFilter = document.getElementById('staffing-client-filter').value;
+
+      const sowFilter = document.getElementById('staffing-sow-filter').value.trim();
+
+      const projectFilter = document.getElementById('staffing-project-filter').value.trim().toLowerCase();
+
+      const sowMap = {};
+
+      allFolders.forEach(f => {
+
+        if (!f.project) return;
+
+        const cfs = f.customFields || [];
+
+        const sow = (cfs.find(cf => cf.id === STAFFING_SOW_FIELD) || {}).value;
+
+        if (!sow) return;
+
+        const existing = sowMap[sow];
+
+        const hasDates = !!(f.project.startDate && f.project.endDate);
+
+        if (!existing || (hasDates && !existing._hasDates)) {
+
+          sowMap[sow] = { ...f, _hasDates: hasDates };
+
+        }
+
+      });
+
+      let projects = Object.values(sowMap);
+
+      if (clientFilter) projects = projects.filter(f => {
+
+        const cfs = f.customFields || [];
+
+        const cf = cfs.find(c => c.id === STAFFING_CLIENT_FIELD);
+
+        return (cf && cf.value || '').trim() === clientFilter;
+
+      });
+
+      if (sowFilter) projects = projects.filter(f => {
+
+        const cfs = f.customFields || [];
+
+        const cf = cfs.find(c => c.id === STAFFING_SOW_FIELD);
+
+        return String(cf && cf.value || '') === sowFilter;
+
+      });
+
+      if (projectFilter) projects = projects.filter(f =>
+
+        (f.title || '').toLowerCase().includes(projectFilter)
+
+      );
+
+      if (projects.length === 0) {
+
+        setStaffingStatus('No projects found matching the current filters', 'error');
+
+        return;
+
+      }
+
+      setStaffingStatus(`Found ${projects.length} project${projects.length !== 1 ? 's' : ''} \u2014 loading tasks...`, 'loading');
+
+      const staffingMap = {};
+
+      for (const proj of projects) {
+
+        const cfs = proj.customFields || [];
+
+        const clientName = (cfs.find(cf => cf.id === STAFFING_CLIENT_FIELD) || {}).value || '';
+
+        const sowNum = (cfs.find(cf => cf.id === STAFFING_SOW_FIELD) || {}).value || '';
+
+        const taskRes = await apiFetch(`/folders/${proj.id}/tasks?descendants=true&fields=%5BcustomFields%5D`);
+
+        const tasks = (taskRes.data || []).filter(t => !EXCLUDED_STATUSES.has(t.status));
+
+        const roleMap = {};
+
+        for (const task of tasks) {
+
+          const taskCfs = task.customFields || [];
+
+          const typeField = taskCfs.find(cf => cf.id === STAFFING_TASKTYPE_FIELD);
+
+          if (!typeField || !typeField.value) continue;
+
+          let types = [];
+
+          try {
+
+            const parsed = typeof typeField.value === 'string' && typeField.value.startsWith('[')
+
+              ? JSON.parse(typeField.value)
+
+              : [typeField.value];
+
+            types = Array.isArray(parsed) ? parsed : [parsed];
+
+          } catch(e) {
+
+            types = [String(typeField.value)];
+
+          }
+
+          const assignees = task.responsibleIds || [];
+
+          if (assignees.length === 0) continue;
+
+          types.forEach(type => {
+
+            if (!type) return;
+
+            if (!roleMap[type]) roleMap[type] = new Set();
+
+            assignees.forEach(uid => roleMap[type].add(uid));
+
+          });
+
+        }
+
+        if (Object.keys(roleMap).length === 0) continue;
+
+        staffingMap[proj.id] = {
+
+          id: proj.id, title: proj.title,
+
+          clientName: clientName.trim(),
+
+          sow: String(sowNum),
+
+          permalink: proj.permalink || '',
+
+          startDate: proj.project?.startDate || '',
+
+          endDate: proj.project?.endDate || '',
+
+          roleMap
+
+        };
+
+      }
+
+      staffingData = Object.values(staffingMap);
+
+      populateStaffingFilters();
+
+      renderStaffingReport();
+
+      document.getElementById('staffing-clear-btn').style.display = 'inline-block';
+
+      setStaffingStatus(`Report generated \u2014 ${staffingData.length} project${staffingData.length !== 1 ? 's' : ''} with staffing data`, 'success');
+
+    } catch(e) {
+
+      setStaffingStatus('Error generating report: ' + e.message, 'error');
+
+    }
+
+  }
+
+  function populateStaffingFilters() {
+
+    const clientSel = document.getElementById('staffing-client-filter');
+
+    const currentClient = clientSel.value;
+
+    const clients = [...new Set(staffingData.map(p => p.clientName).filter(Boolean))].sort();
+
+    clientSel.innerHTML = '<option value="">All Clients</option>';
+
+    clients.forEach(c => {
+
+      const opt = document.createElement('option');
+
+      opt.value = c; opt.textContent = c;
+
+      if (c === currentClient) opt.selected = true;
+
+      clientSel.appendChild(opt);
+
+    });
+
+    const userSel = document.getElementById('staffing-user-filter');
+
+    const currentUser = userSel.value;
+
+    const userIds = new Set();
+
+    staffingData.forEach(p => Object.values(p.roleMap).forEach(s => s.forEach(uid => userIds.add(uid))));
+
+    const users = [...userIds].map(uid => ({ id: uid, name: contactMap[uid] || uid }))
+
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    userSel.innerHTML = '<option value="">All Users</option>';
+
+    users.forEach(u => {
+
+      const opt = document.createElement('option');
+
+      opt.value = u.id; opt.textContent = u.name;
+
+      if (u.id === currentUser) opt.selected = true;
+
+      userSel.appendChild(opt);
+
+    });
+
+    const roleSel = document.getElementById('staffing-role-filter');
+
+    const currentRole = roleSel.value;
+
+    const roles = new Set();
+
+    staffingData.forEach(p => Object.keys(p.roleMap).forEach(r => roles.add(r)));
+
+    roleSel.innerHTML = '<option value="">All Roles</option>';
+
+    [...roles].sort().forEach(r => {
+
+      const opt = document.createElement('option');
+
+      opt.value = r; opt.textContent = r;
+
+      if (r === currentRole) opt.selected = true;
+
+      roleSel.appendChild(opt);
+
+    });
+
+  }
+
+  function clearStaffingFilters() {
+
+    document.getElementById('staffing-client-filter').value = '';
+
+    document.getElementById('staffing-sow-filter').value = '';
+
+    document.getElementById('staffing-project-filter').value = '';
+
+    document.getElementById('staffing-user-filter').value = '';
+
+    document.getElementById('staffing-role-filter').value = '';
+
+    renderStaffingReport();
+
+  }
+
+  function renderStaffingReport() {
+
+    const out = document.getElementById('staffing-output');
+
+    out.style.display = 'block';
+
+    const clientFilter = document.getElementById('staffing-client-filter').value;
+
+    const sowFilter = document.getElementById('staffing-sow-filter').value.trim();
+
+    const projectFilter = document.getElementById('staffing-project-filter').value.trim().toLowerCase();
+
+    const userFilter = document.getElementById('staffing-user-filter').value;
+
+    const roleFilter = document.getElementById('staffing-role-filter').value;
+
+    let filtered = staffingData.filter(p => {
+
+      if (clientFilter && p.clientName !== clientFilter) return false;
+
+      if (sowFilter && p.sow !== sowFilter) return false;
+
+      if (projectFilter && !p.title.toLowerCase().includes(projectFilter)) return false;
+
+      if (userFilter) {
+
+        const hasUser = Object.values(p.roleMap).some(s => s.has(userFilter));
+
+        if (!hasUser) return false;
+
+      }
+
+      if (roleFilter && !p.roleMap[roleFilter]) return false;
+
+      return true;
+
+    });
+
+    document.getElementById('staffing-count').textContent =
+
+      `${filtered.length} of ${staffingData.length} project${staffingData.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+
+      out.innerHTML = '<p style="font-size:13px;color:var(--text-muted);padding:2rem 0;">No projects match the current filters.</p>';
+
+      return;
+
+    }
+
+    const byClient = {};
+
+    filtered.forEach(p => {
+
+      const client = p.clientName || '(No client)';
+
+      if (!byClient[client]) byClient[client] = [];
+
+      byClient[client].push(p);
+
+    });
+
+    Object.values(byClient).forEach(arr => arr.sort((a, b) => a.sow.localeCompare(b.sow, undefined, { numeric: true })));
+
+    let html = '';
+
+    Object.keys(byClient).sort().forEach(client => {
+
+      html += `
+
+        <div style="margin-bottom:1.5rem;">
+
+          <div style="font-size:15px;font-weight:700;color:var(--text);padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius);border-left:3px solid var(--success-text);margin-bottom:8px;">
+
+            ${client}
+
+          </div>`;
+
+      byClient[client].forEach(proj => {
+
+        const projTitle = proj.permalink
+
+          ? `<a href="${proj.permalink}" target="_blank" style="color:var(--text);text-decoration:none;font-weight:600;">${proj.title}</a>`
+
+          : `<span style="font-weight:600;">${proj.title}</span>`;
+
+        html += `
+
+          <div style="margin-left:16px;margin-bottom:12px;">
+
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;">
+
+              <span style="font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-right:8px;">SOW ${proj.sow}</span>
+
+              ${projTitle}
+
+              ${proj.startDate ? `<span style="font-size:11px;color:var(--text-muted);margin-left:8px;">${proj.startDate} \u2014 ${proj.endDate || 'ongoing'}</span>` : ''}
+
+            </div>
+
+            <div style="margin-left:16px;">
+
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+
+                <thead>
+
+                  <tr>
+
+                    <th style="text-align:left;padding:5px 10px;background:var(--bg-tertiary);border-bottom:0.5px solid var(--border);color:var(--text-muted);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;width:40%;">Task Type / Role</th>
+
+                    <th style="text-align:left;padding:5px 10px;background:var(--bg-tertiary);border-bottom:0.5px solid var(--border);color:var(--text-muted);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;">Assigned Team Members</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>`;
+
+        const rolesToShow = Object.entries(proj.roleMap)
+
+          .filter(([role]) => !roleFilter || role === roleFilter)
+
+          .sort(([a], [b]) => a.localeCompare(b));
+
+        rolesToShow.forEach(([role, userSet], i) => {
+
+          const users = [...userSet]
+
+            .filter(uid => !userFilter || uid === userFilter)
+
+            .map(uid => contactMap[uid] || uid)
+
+            .sort()
+
+            .join(', ');
+
+          if (!users) return;
+
+          const bg = i % 2 === 0 ? 'var(--bg)' : 'var(--bg-secondary)';
+
+          html += `
+
+                  <tr style="background:${bg};">
+
+                    <td style="padding:6px 10px;border-bottom:0.5px solid var(--border);">
+
+                      <span class="tag tag-muted" style="font-size:11px;">${role}</span>
+
+                    </td>
+
+                    <td style="padding:6px 10px;border-bottom:0.5px solid var(--border);color:var(--text);">${users}</td>
+
+                  </tr>`;
+
+        });
+
+        html += `
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>`;
+
+      });
+
+      html += '</div>';
+
+    });
+
+    out.innerHTML = html;
+
+  }
+
+  const LOGO_IMG = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbgAAADmCAIAAAAoWwfXAAAABmJLR0QA/wD/AP+gvaeTAAEAAElEQVR4nO3..." width="220" height="115" alt="Informatics Inc" style="display:block;border:0;outline:none;text-decoration:none;" />';
+
+  function buildEmailHTML() {
+
+    if (!lastReportData) return '';
+
+    const d = lastReportData;
+
+    const message = document.getElementById('wysiwyg-editor').innerHTML;
+
+    const overrideTotal = Object.values(reportOverrides).reduce((s, v) => s + v, 0);
+
+    const combinedUsed = d.totalUsedHrs + overrideTotal;
+
+    const remainingHrs = d.totalRetainerHrs !== null ? d.totalRetainerHrs - combinedUsed : null;
+
+    const pctUsed = d.totalRetainerHrs ? Math.round((combinedUsed / d.totalRetainerHrs) * 100) : null;
+
+    const pctRemaining = d.totalRetainerHrs && remainingHrs !== null ? Math.round((Math.max(0, remainingHrs) / d.totalRetainerHrs) * 100) : null;
+
+    const generatedDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+    const NAVY = '#05314C';
+
+    const GREEN = '#A2B243';
+
+    const LIGHT_GREEN = '#f4f7e8';
+
+    const BORDER = '#dddddd';
+
+    const TEXT = '#333333';
+
+    const MUTED = '#666666';
+
+    const BG = '#f9f9f9';
+
+    const showAlloc = d.monthlyAlloc !== null;
+
+    let monthRowsHtml = '';
+
+    let rowNum = 0;
+
+    for (const { year, month, hrs } of d.monthlyHours) {
+
+      const key = `${year}-${month}`;
+
+      const overrideHrs = reportOverrides[key] || 0;
+
+      const displayHrs = overrideHrs > 0 ? overrideHrs : hrs;
+
+      const isPreCutover = year < 2026 || (year === 2026 && month < 5);
+
+      const bg = rowNum % 2 === 0 ? '#ffffff' : BG;
+
+      const allocCell = showAlloc ? `<td align="right" bgcolor="${bg}" style="padding:7px 12px;border:1px solid ${BORDER};"><font color="${MUTED}" face="Courier New,monospace" size="2">${formatDecimalHrs(d.monthlyAlloc)}</font></td>` : '';
+
+      const legacyNote = isPreCutover && overrideHrs > 0 ? ' <font color="#999999" size="1">(legacy)</font>' : '';
+
+      monthRowsHtml += `<tr>
+
+        <td bgcolor="${bg}" style="padding:7px 12px;border:1px solid ${BORDER};"><font color="${TEXT}" face="Arial,Helvetica,sans-serif" size="2">${MONTHS[month]} ${year}${legacyNote}</font></td>
+
+        ${allocCell}
+
+        <td align="right" bgcolor="${bg}" style="padding:7px 12px;border:1px solid ${BORDER};"><font color="${NAVY}" face="Courier New,monospace" size="2"><b>${formatDecimalHrs(displayHrs)}</b></font></td>
+
+      </tr>`;
+
+      rowNum++;
+
+    }
+
+    const allocHeader = showAlloc ? `<th style="padding:8px 12px;text-align:right;background:${NAVY};color:#ffffff;border:1px solid ${NAVY};font-weight:600;"><span style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:12px;">Allocated</span></th>` : '';
+
+    let taskRowsHtml = '';
+
+    for (const proj of d.projectDetails) {
+
+      const projTaskIds = d.projectTaskMap[proj.id] || [];
+
+      const projEntries = projTaskIds.filter(tid => d.taskHours[tid]);
+
+      if (projEntries.length === 0) continue;
+
+      const projTotal = projEntries.reduce((s, tid) => s + (d.taskHours[tid] || 0), 0);
+
+      taskRowsHtml += `<tr><td colspan="2" bgcolor="${LIGHT_GREEN}" style="padding:8px 12px;border:1px solid ${BORDER};"><font color="${NAVY}" face="Arial,Helvetica,sans-serif" size="2"><b>&#8627; ${proj.title}</b></font></td></tr>`;
+
+      for (const tid of projTaskIds) {
+
+        const hrs = d.taskHours[tid];
+
+        if (!hrs) continue;
+
+        taskRowsHtml += `<tr>
+
+          <td bgcolor="#ffffff" style="padding:7px 12px 7px 24px;border:1px solid ${BORDER};"><font color="${TEXT}" face="Arial,Helvetica,sans-serif" size="2">${d.reportTaskMap[tid]?.title || tid}</font></td>
+
+          <td align="right" bgcolor="#ffffff" style="padding:7px 12px;border:1px solid ${BORDER};"><font color="${NAVY}" face="Courier New,monospace" size="2"><b>${formatDecimalHrs(hrs)}</b></font></td>
+
+        </tr>`;
+
+      }
+
+      taskRowsHtml += `<tr>
+
+        <td bgcolor="${BG}" style="padding:6px 12px;border:1px solid ${BORDER};"><font color="${MUTED}" face="Arial,Helvetica,sans-serif" size="1">Subtotal</font></td>
+
+        <td align="right" bgcolor="${BG}" style="padding:6px 12px;border:1px solid ${BORDER};"><font color="${NAVY}" face="Courier New,monospace" size="2"><b>${formatDecimalHrs(projTotal)}</b></font></td>
+
+      </tr>`;
+
+    }
+
+    const periodTotal = Object.values(d.taskHours).reduce((s, h) => s + h, 0);
+
+    if (taskRowsHtml) {
+
+      taskRowsHtml += `<tr>
+
+        <td bgcolor="${NAVY}" style="padding:8px 12px;border:1px solid ${NAVY};color:#ffffff;"><font color="#ffffff" face="Arial,Helvetica,sans-serif" size="2"><b>Total \u2014 ${d.periodLabel}</b></font></td>
+
+        <td align="right" bgcolor="${NAVY}" style="padding:8px 12px;border:1px solid ${NAVY};color:#ffffff;"><font color="#ffffff" face="Courier New,monospace" size="2"><b>${formatDecimalHrs(periodTotal)}</b></font></td>
+
+      </tr>`;
+
+    }
+
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Retainer Report</title></head>
+
+<body style="margin:0;padding:0;background:#f0f0f0;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f0f0"><tr><td align="center" style="padding:24px 16px;">
+
+  <table width="620" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border:2px solid ${NAVY};">
+
+    <tr><td bgcolor="${NAVY}" style="padding:8px 24px;">
+
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+
+        <td width="50%" valign="middle">${LOGO_IMG}</td>
+
+        <td width="50%" align="right" valign="bottom">
+
+          <p style="margin:0 0 2px 0;color:#A2B243;"><b>Monthly Retainer Report</b></p>
+
+          <p style="margin:0 0 2px 0;color:#cccccc;">${d.periodLabel}</p>
+
+          <p style="margin:0;color:#999999;">Generated ${generatedDate}</p>
+
+        </td>
+
+      </tr></table>
+
+    </td></tr>
+
+    <tr><td bgcolor="${GREEN}" style="height:3px;font-size:3px;line-height:3px;">&nbsp;</td></tr>
+
+    <tr><td style="padding:24px 32px 20px;"><font color="${TEXT}" face="Arial,Helvetica,sans-serif" size="3">${message}</font></td></tr>
+
+    <tr><td bgcolor="${GREEN}" style="height:2px;font-size:2px;line-height:2px;">&nbsp;</td></tr>
+
+    <tr><td style="padding:20px 32px 0;">
+
+      <table width="100%" cellpadding="0" cellspacing="8"><tr>
+
+        <td width="25%" valign="top"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="${BG}" style="border:1px solid ${BORDER};">
+
+          <tr><td style="padding:10px 12px;"><p style="margin:0 0 4px 0;"><font color="${MUTED}" face="Arial,Helvetica,sans-serif" size="1"><b>RETAINER TOTAL</b></font></p>
+
+          <p style="margin:0;"><font color="${NAVY}" face="Courier New,monospace" size="4"><b>${d.totalRetainerHrs !== null ? formatDecimalHrs(d.totalRetainerHrs) : '\u2014'}</b></font></p></td></tr>
+
+        </table></td>
+
+        <td width="25%" valign="top"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="${BG}" style="border:1px solid ${BORDER};">
+
+          <tr><td style="padding:10px 12px;"><p style="margin:0 0 4px 0;"><font color="${MUTED}" face="Arial,Helvetica,sans-serif" size="1"><b>HOURS USED</b></font></p>
+
+          <p style="margin:0;"><font color="${NAVY}" face="Courier New,monospace" size="4"><b>${formatDecimalHrs(combinedUsed)}</b></font></p></td></tr>
+
+        </table></td>
+
+        <td width="25%" valign="top"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f6e4" style="border:1px solid ${GREEN};">
+
+          <tr><td style="padding:10px 12px;"><p style="margin:0 0 4px 0;"><font color="#5a6e20" face="Arial,Helvetica,sans-serif" size="1"><b>REMAINING</b></font></p>
+
+          <p style="margin:0;"><font color="#3d4f10" face="Courier New,monospace" size="4"><b>${remainingHrs !== null ? formatDecimalHrs(Math.max(0, remainingHrs)) : '\u2014'}</b></font></p></td></tr>
+
+        </table></td>
+
+        <td width="25%" valign="top"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="${BG}" style="border:1px solid ${BORDER};">
+
+          <tr><td style="padding:10px 12px;"><p style="margin:0 0 4px 0;"><font color="${MUTED}" face="Arial,Helvetica,sans-serif" size="1"><b>${d.periodLabel.toUpperCase()}</b></font></p>
+
+          <p style="margin:0;"><font color="${NAVY}" face="Courier New,monospace" size="4"><b>${formatDecimalHrs(d.periodHrs)}</b></font></p></td></tr>
+
+        </table></td>
+
+      </tr></table>
+
+    </td></tr>
+
+    <tr><td style="padding:0 32px 24px;">
+
+      <p style="margin:0 0 8px 0;"><font color="${MUTED}" face="Arial,Helvetica,sans-serif" size="1"><b>MONTHLY HOURS</b></font></p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+
+        <tr><th align="left" bgcolor="${NAVY}" style="padding:8px 12px;border:1px solid ${NAVY};color:#ffffff;"><font color="#ffffff" face="Arial,Helvetica,sans-serif" size="2"><b>Month</b></font></th>
+
+        ${allocHeader}
+
+        <th align="right" bgcolor="${NAVY}" style="padding:8px 12px;border:1px solid ${NAVY};color:#ffffff;"><font color="#ffffff" face="Arial,Helvetica,sans-serif" size="2"><b>Hours Used</b></font></th></tr>
+
+        ${monthRowsHtml}
+
+      </table>
+
+    </td></tr>
+
+    ${taskRowsHtml ? `<tr><td style="padding:0 32px 32px;">
+
+      <p style="margin:0 0 8px 0;"><font color="${MUTED}" face="Arial,Helvetica,sans-serif" size="1"><b>TASK BREAKDOWN</b></font></p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+
+        <tr><th align="left" bgcolor="${NAVY}" style="padding:8px 12px;border:1px solid ${NAVY};color:#ffffff;"><font color="#ffffff" face="Arial,Helvetica,sans-serif" size="2"><b>Task</b></font></th>
+
+        <th align="right" bgcolor="${NAVY}" style="padding:8px 12px;border:1px solid ${NAVY};color:#ffffff;"><font color="#ffffff" face="Arial,Helvetica,sans-serif" size="2"><b>Hours</b></font></th></tr>
+
+        ${taskRowsHtml}
+
+      </table>
+
+    </td></tr>` : ''}
+
+    <tr><td bgcolor="${NAVY}" style="padding:12px 32px;">
+
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+
+        <td><font color="#aaaaaa" face="Arial,Helvetica,sans-serif" size="1">Informatics, Inc. &#183; informaticsinc.com</font></td>
+
+        <td align="right"><font color="#777777" face="Arial,Helvetica,sans-serif" size="1">Confidential \u2014 for client use only</font></td>
+
+      </tr></table>
+
+    </td></tr>
+
+  </table>
+
+</td></tr></table>
+
+</body></html>`;
+
+  }
+
+</script>
+
+</body>
+
+</html>
